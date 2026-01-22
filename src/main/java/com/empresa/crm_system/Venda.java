@@ -1,6 +1,7 @@
 package com.empresa.crm_system;
 
-
+import com.empresa.crm_system.enums.FormaPagamento;
+import com.empresa.crm_system.enums.StatusVenda;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;

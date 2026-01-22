@@ -1,11 +1,10 @@
 package com.empresa.crm_system;
 
-
+import com.empresa.crm_system.enums.StatusCliente;
+import com.empresa.crm_system.enums.TipoCliente;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import br.com.objectos.serasa.relato.factoring.TipoCliente;
 
 @Entity
 @Table(name = "clientes")

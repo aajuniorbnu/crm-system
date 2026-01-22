@@ -1,6 +1,6 @@
-
 package com.empresa.crm_system;
 
+import com.empresa.crm_system.enums.StatusProduto;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 

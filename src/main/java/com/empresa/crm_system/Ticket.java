@@ -1,5 +1,7 @@
 package com.empresa.crm_system;
 
+import com.empresa.crm_system.enums.PrioridadeTicket;
+import com.empresa.crm_system.enums.StatusTicket;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
