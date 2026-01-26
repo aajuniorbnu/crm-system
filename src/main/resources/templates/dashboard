@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(titulo='Dashboard', pagina='dashboard', conteudo=~{::content})}">
+<div th:fragment="content">
+    <h2>Dashboard</h2>
+
+    <!-- Cards de Estatísticas -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <a th:href="@{/clientes}" style="text-decoration: none; color: inherit;">
+                <div class="card stat-card primary">
+                    <div class="card-body text-center">
+                        <h5>Total de Clientes</h5>
+                        <h2 th:text="${totalClientes}">0</h2>
+                        <small class="text-muted">Cadastrados no sistema</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a th:href="@{/vendas}" style="text-decoration: none; color: inherit;">
+                <div class="card stat-card success">
+                    <div class="card-body text-center">
+                        <h5>Vendas do Mês</h5>
+                        <h2 th:text="${vendasMes}">0</h2>
+                        <small class="text-muted">Total de vendas</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a th:href="@{/produtos}" style="text-decoration: none; color: inherit;">
+                <div class="card stat-card warning">
+                    <div class="card-body text-center">
+                        <h5>Produtos</h5>
+                        <h2 th:text="${totalProdutos}">0</h2>
+                        <small class="text-muted">No estoque</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a th:href="@{/tickets}" style="text-decoration: none; color: inherit;">
+                <div class="card stat-card danger">
+                    <div class="card-body text-center">
+                        <h5>Tickets Abertos</h5>
+                        <h2 th:text="${ticketsAbertos}">0</h2>
+                        <small class="text-muted">Aguardando atendimento</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Tabelas de Dados -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>Últimas Vendas</h5>
+                    <a th:href="@{/vendas}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-arrow-right"></i> Ver Todas
+                    </a>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="venda : ${ultimasVendas}">
+                                <td th:text="${venda.id}"></td>
+                                <td>
+                                    <a th:href="@{/clientes}" th:text="${venda.cliente != null ? venda.cliente.nome : 'N/A'}"></a>
+                                </td>
+                                <td th:text="${'R$ ' + #numbers.formatDecimal(venda.valorFinal, 1, 2)}"></td>
+                                <td><span class="badge bg-success" th:text="${venda.status}"></span></td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(ultimasVendas)}">
+                                <td colspan="4" class="text-center text-muted">Nenhuma venda registrada</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>Produtos com Estoque Baixo</h5>
+                    <a th:href="@{/produtos}" class="btn btn-sm btn-warning">
+                        <i class="bi bi-arrow-right"></i> Ver Todos
+                    </a>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Estoque</th>
+                                <th>Mínimo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="produto : ${produtosEstoqueBaixo}">
+                                <td th:text="${produto.nome}"></td>
+                                <td><span class="badge bg-danger" th:text="${produto.estoque}"></span></td>
+                                <td th:text="${produto.estoqueMinimo}"></td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(produtosEstoqueBaixo)}">
+                                <td colspan="3" class="text-center text-muted">
+                                    <i class="bi bi-check-circle text-success"></i> Todos os produtos com estoque adequado
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações Rápidas -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Ações Rápidas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a th:href="@{/clientes}" class="btn btn-primary w-100">
+                                <i class="bi bi-person-plus"></i> Novo Cliente
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a th:href="@{/produtos}" class="btn btn-warning w-100">
+                                <i class="bi bi-box-seam"></i> Novo Produto
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a th:href="@{/vendas}" class="btn btn-success w-100">
+                                <i class="bi bi-cart-plus"></i> Nova Venda
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a th:href="@{/tickets}" class="btn btn-info w-100">
+                                <i class="bi bi-ticket"></i> Novo Ticket
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

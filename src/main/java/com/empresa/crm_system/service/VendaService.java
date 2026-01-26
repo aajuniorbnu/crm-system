@@ -12,6 +12,7 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
+@SuppressWarnings("unused")
 @Service
 public class VendaService {
 

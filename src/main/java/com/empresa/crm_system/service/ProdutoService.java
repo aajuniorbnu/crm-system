@@ -1,7 +1,6 @@
 package com.empresa.crm_system.service;
 
 import com.empresa.crm_system.Produto;
-import com.empresa.crm_system.enums.StatusProduto;
 import com.empresa.crm_system.repository.ProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

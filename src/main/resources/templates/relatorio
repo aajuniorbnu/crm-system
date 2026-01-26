@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(titulo='Relatórios', pagina='relatorios', 
+conteudo=~{::content})}">
+<head><link rel="stylesheet" href="/src/main/resources/static/css/styles.css"></head>
+
+<div th:fragment="content">
+    <h2>Relatórios</h2>
+
+    <!-- Filtros de Período -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Período de Análise</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Data Início</label>
+                    <input type="date" class="form-control" id="dataInicio">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Data Fim</label>
+                    <input type="date" class="form-control" id="dataFim">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">&nbsp;</label>
+                    <button class="btn btn-primary w-100" onclick="gerarRelatorios()">
+                        <i class="bi bi-graph-up"></i> Gerar Relatórios
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Relatórios Rápidos -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card primary">
+                <div class="card-body text-center">
+                    <h5>Total de Vendas</h5>
+                    <h2 id="totalVendas">0</h2>
+                    <small class="text-muted">No período</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card success">
+                <div class="card-body text-center">
+                    <h5>Faturamento</h5>
+                    <h2 id="faturamento">R$ 0,00</h2>
+                    <small class="text-muted">Total faturado</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card warning">
+                <div class="card-body text-center">
+                    <h5>Novos Clientes</h5>
+                    <h2 id="novosClientes">0</h2>
+                    <small class="text-muted">Cadastrados</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card danger">
+                <div class="card-body text-center">
+                    <h5>Tickets Resolvidos</h5>
+                    <h2 id="ticketsResolvidos">0</h2>
+                    <small class="text-muted">Finalizados</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Relatórios Detalhados -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>Top 10 Clientes</h5>
+                    <button class="btn btn-sm btn-success" onclick="exportarCSV('clientes')">
+                        <i class="bi bi-download"></i> Exportar
+                    </button>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Total Compras</th>
+                                <th>Valor Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topClientes">
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">
+                                    Selecione um período e clique em "Gerar Relatórios"
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>Produtos Mais Vendidos</h5>
+                    <button class="btn btn-sm btn-success" onclick="exportarCSV('produtos')">
+                        <i class="bi bi-download"></i> Exportar
+                    </button>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Quantidade</th>
+                                <th>Faturamento</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topProdutos">
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">
+                                    Selecione um período e clique em "Gerar Relatórios"
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>Vendas por Status</h5>
+                    <button class="btn btn-sm btn-success" onclick="exportarCSV('status')">
+                        <i class="bi bi-download"></i> Exportar
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 text-center mb-3">
+                            <h3 id="vendasPendentes" class="text-warning">0</h3>
+                            <p class="text-muted">Pendentes</p>
+                        </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <h3 id="vendasAprovadas" class="text-success">0</h3>
+                            <p class="text-muted">Aprovadas</p>
+                        </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <h3 id="vendasCanceladas" class="text-danger">0</h3>
+                            <p class="text-muted">Canceladas</p>
+                        </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <h3 id="vendasEntregues" class="text-info">0</h3>
+                            <p class="text-muted">Entregues</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações Rápidas -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Ações Rápidas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <button class="btn btn-primary w-100" onclick="imprimirRelatorio()">
+                                <i class="bi bi-printer"></i> Imprimir Relatório
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <button class="btn btn-success w-100" onclick="exportarPDF()">
+                                <i class="bi bi-file-pdf"></i> Exportar PDF
+                            </button>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a th:href="@{/dashboard}" class="btn btn-info w-100">
+                                <i class="bi bi-speedometer2"></i> Voltar ao Dashboard
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <button class="btn btn-secondary w-100" onclick="limparRelatorios()">
+                                <i class="bi bi-x-circle"></i> Limpar Filtros
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        
+        // Definir datas padrão (último mês)
+        window.addEventListener('DOMContentLoaded', function() {
+            const hoje = new Date();
+            const umMesAtras = new Date(hoje);
+            umMesAtras.setMonth(hoje.getMonth() - 1);
+            
+            document.getElementById('dataInicio').valueAsDate = umMesAtras;
+            document.getElementById('dataFim').valueAsDate = hoje;
+        });
+
+        function gerarRelatorios() {
+            const dataInicio = document.getElementById('dataInicio').value;
+            const dataFim = document.getElementById('dataFim').value;
+            
+            if (!dataInicio || !dataFim) {
+                alert('Por favor, selecione o período de análise.');
+                return;
+            }
+            
+            // Buscar vendas do período
+            fetch(`/api/vendas`)
+            .then(response => response.json())
+            .then(vendas => {
+                // Filtrar vendas pelo período
+                const vendasPeriodo = vendas.filter(v => {
+                    const dataVenda = new Date(v.dataVenda);
+                    return dataVenda >= new Date(dataInicio) && dataVenda <= new Date(dataFim);
+                });
+                
+                // Atualizar estatísticas
+                atualizarEstatisticas(vendasPeriodo);
+                atualizarTopClientes(vendasPeriodo);
+                atualizarVendasPorStatus(vendasPeriodo);
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao gerar relatórios.');
+            });
+        }
+
+        function atualizarEstatisticas(vendas) {
+            // Total de vendas
+            document.getElementById('totalVendas').textContent = vendas.length;
+            
+            // Faturamento
+            const faturamento = vendas.reduce((total, v) => total + (v.valorFinal || 0), 0);
+            document.getElementById('faturamento').textContent = 'R$ ' + faturamento.toFixed(2);
+            
+            // Novos clientes (simulado)
+            document.getElementById('novosClientes').textContent = Math.floor(vendas.length * 0.3);
+            
+            // Tickets resolvidos (simulado)
+            document.getElementById('ticketsResolvidos').textContent = Math.floor(vendas.length * 0.8);
+        }
+
+        function atualizarTopClientes(vendas) {
+            // Agrupar vendas por cliente
+            const clientesMap = {};
+            vendas.forEach(v => {
+                if (v.cliente) {
+                    const clienteId = v.cliente.id;
+                    if (!clientesMap[clienteId]) {
+                        clientesMap[clienteId] = {
+                            nome: v.cliente.nome,
+                            totalCompras: 0,
+                            valorTotal: 0
+                        };
+                    }
+                    clientesMap[clienteId].totalCompras++;
+                    clientesMap[clienteId].valorTotal += v.valorFinal || 0;
+                }
+            });
+            
+            // Converter para array e ordenar
+            const topClientes = Object.values(clientesMap)
+                .sort((a, b) => b.valorTotal - a.valorTotal)
+                .slice(0, 10);
+            
+            // Atualizar tabela
+            const tbody = document.getElementById('topClientes');
+            tbody.innerHTML = '';
+            
+            if (topClientes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Nenhum dado encontrado</td></tr>';
+                return;
+            }
+            
+            topClientes.forEach(cliente => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${cliente.nome}</td>
+                    <td>${cliente.totalCompras}</td>
+                    <td>R$ ${cliente.valorTotal.toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function atualizarVendasPorStatus(vendas) {
+            const statusCount = {
+                PENDENTE: 0,
+                APROVADA: 0,
+                CANCELADA: 0,
+                ENTREGUE: 0
+            };
+            
+            vendas.forEach(v => {
+                if (statusCount[v.status] !== undefined) {
+                    statusCount[v.status]++;
+                }
+            });
+            
+            document.getElementById('vendasPendentes').textContent = statusCount.PENDENTE;
+            document.getElementById('vendasAprovadas').textContent = statusCount.APROVADA;
+            document.getElementById('vendasCanceladas').textContent = statusCount.CANCELADA;
+            document.getElementById('vendasEntregues').textContent = statusCount.ENTREGUE;
+        }
+
+        function exportarCSV(tipo) {
+            alert(`Exportando ${tipo} para CSV... (funcionalidade em desenvolvimento)`);
+        }
+
+        function imprimirRelatorio() {
+            window.print();
+        }
+
+        function exportarPDF() {
+            alert('Exportando para PDF... (funcionalidade em desenvolvimento)');
+        }
+
+        function limparRelatorios() {
+            // Limpar todos os dados
+            document.getElementById('totalVendas').textContent = '0';
+            document.getElementById('faturamento').textContent = 'R$ 0,00';
+            document.getElementById('novosClientes').textContent = '0';
+            document.getElementById('ticketsResolvidos').textContent = '0';
+            
+            document.getElementById('topClientes').innerHTML = '<tr><td colspan="3" class="text-center text-muted">Selecione um período e clique em "Gerar Relatórios"</td></tr>';
+            document.getElementById('topProdutos').innerHTML = '<tr><td colspan="3" class="text-center text-muted">Selecione um período e clique em "Gerar Relatórios"</td></tr>';
+            
+            document.getElementById('vendasPendentes').textContent = '0';
+            document.getElementById('vendasAprovadas').textContent = '0';
+            document.getElementById('vendasCanceladas').textContent = '0';
+            document.getElementById('vendasEntregues').textContent = '0';
+        }
+        
+        /*]]>*/
+    </script>
+</div>
+</html>

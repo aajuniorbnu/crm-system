@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(titulo='Produtos', pagina='produtos', conteudo=~{::content})}">
+
+<head><link rel="stylesheet" href="/src/main/resources/static/css/styles.css"></head>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Gerenciamento de Produtos</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalProduto">
+            <i class="bi bi-plus-circle"></i> Novo Produto
+        </button>
+    </div>
+
+    <!-- Cards de Resumo -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 th:text="${totalProdutos}">0</h3>
+                    <p class="text-muted">Total de Produtos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 th:text="${'R$ ' + valorEstoque}">R$ 0,00</h3>
+                    <p class="text-muted">Valor em Estoque</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <h3 class="text-warning" th:text="${produtosEstoqueBaixo}">0</h3>
+                    <p class="text-muted">Estoque Baixo</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-5 mb-3">
+                    <input type="text" class="form-control" id="searchProduto" placeholder="Buscar por nome ou código...">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <select class="form-select" id="filterCategoria">
+                        <option value="">Todas as Categorias</option>
+                        <option value="Eletrônicos">Eletrônicos</option>
+                        <option value="Alimentos">Alimentos</option>
+                        <option value="Vestuário">Vestuário</option>
+                        <option value="Móveis">Móveis</option>
+                    </select>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <select class="form-select" id="filterStatus">
+                        <option value="">Todos os Status</option>
+                        <option value="ATIVO">Ativo</option>
+                        <option value="INATIVO">Inativo</option>
+                        <option value="ESGOTADO">Esgotado</option>
+                    </select>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <button class="btn btn-secondary w-100" onclick="filtrarProdutos()">
+                        <i class="bi bi-funnel"></i> Filtrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Produtos -->
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nome</th>
+                        <th>Categoria</th>
+                        <th>Preço</th>
+                        <th>Estoque</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="produtosTableBody">
+                    <tr th:each="produto : ${produtos}">
+                        <td th:text="${produto.codigo}"></td>
+                        <td th:text="${produto.nome}"></td>
+                        <td th:text="${produto.categoria}"></td>
+                        <td th:text="${'R$ ' + #numbers.formatDecimal(produto.preco, 1, 2)}"></td>
+                        <td>
+                            <span th:class="${produto.estoque <= produto.estoqueMinimo} ? 'badge bg-danger' : 'badge bg-success'"
+                                  th:text="${produto.estoque}"></span>
+                        </td>
+                        <td><span class="badge bg-info" th:text="${produto.status}"></span></td>
+                        <td>
+                            <button class="btn btn-sm btn-info" th:onclick="'verProduto(' + ${produto.id} + ')'" title="Visualizar">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-warning" th:onclick="'editarProduto(' + ${produto.id} + ')'" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" th:onclick="'deletarProduto(' + ${produto.id} + ')'" title="Excluir">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Cadastrar/Editar Produto -->
+    <div class="modal fade" id="modalProduto" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cadastrar Produto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formProduto">
+                        <input type="hidden" id="produtoId" name="id">
+                        
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label">Nome *</label>
+                                <input type="text" class="form-control" name="nome" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Código *</label>
+                                <input type="text" class="form-control" name="codigo" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Descrição</label>
+                            <textarea class="form-control" name="descricao" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Categoria</label>
+                                <select class="form-select" name="categoria">
+                                    <option value="Eletrônicos">Eletrônicos</option>
+                                    <option value="Alimentos">Alimentos</option>
+                                    <option value="Vestuário">Vestuário</option>
+                                    <option value="Móveis">Móveis</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Unidade de Medida</label>
+                                <select class="form-select" name="unidadeMedida">
+                                    <option value="UN">Unidade</option>
+                                    <option value="KG">Quilograma</option>
+                                    <option value="L">Litro</option>
+                                    <option value="M">Metro</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Preço *</label>
+                                <input type="number" class="form-control" name="preco" step="0.01" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Estoque *</label>
+                                <input type="number" class="form-control" name="estoque" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Estoque Mínimo</label>
+                                <input type="number" class="form-control" name="estoqueMinimo" value="10">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="status">
+                                <option value="ATIVO">Ativo</option>
+                                <option value="INATIVO">Inativo</option>
+                                <option value="ESGOTADO">Esgotado</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="salvarProduto()">
+                        <i class="bi bi-check-lg"></i> Salvar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        
+        function salvarProduto() {
+            const form = document.getElementById('formProduto');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+            
+            if (!data.id) delete data.id;
+            
+            const method = data.id ? 'PUT' : 'POST';
+            const url = data.id ? `/api/produtos/${data.id}` : '/api/produtos';
+
+            fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Erro ao salvar produto');
+                return response.json();
+            })
+            .then(() => {
+                alert('Produto salvo com sucesso!');
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao salvar produto.');
+            });
+        }
+
+        function deletarProduto(id) {
+            if (confirm('Deseja realmente deletar este produto?')) {
+                fetch(`/api/produtos/${id}`, { method: 'DELETE' })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Produto deletado com sucesso!');
+                        location.reload();
+                    } else {
+                        throw new Error('Erro ao deletar produto');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao deletar produto.');
+                });
+            }
+        }
+
+        function verProduto(id) {
+            fetch(`/api/produtos/${id}`)
+            .then(response => response.json())
+            .then(produto => {
+                alert(`Produto: ${produto.nome}\nCódigo: ${produto.codigo}\nPreço: R$ ${produto.preco}\nEstoque: ${produto.estoque}`);
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao buscar produto.');
+            });
+        }
+
+        function editarProduto(id) {
+            fetch(`/api/produtos/${id}`)
+            .then(response => response.json())
+            .then(produto => {
+                document.querySelector('[name="id"]').value = produto.id;
+                document.querySelector('[name="nome"]').value = produto.nome;
+                document.querySelector('[name="codigo"]').value = produto.codigo;
+                document.querySelector('[name="descricao"]').value = produto.descricao || '';
+                document.querySelector('[name="categoria"]').value = produto.categoria;
+                document.querySelector('[name="unidadeMedida"]').value = produto.unidadeMedida;
+                document.querySelector('[name="preco"]').value = produto.preco;
+                document.querySelector('[name="estoque"]').value = produto.estoque;
+                document.querySelector('[name="estoqueMinimo"]').value = produto.estoqueMinimo;
+                document.querySelector('[name="status"]').value = produto.status;
+                
+                document.querySelector('.modal-title').textContent = 'Editar Produto';
+                
+                const modal = new bootstrap.Modal(document.getElementById('modalProduto'));
+                modal.show();
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao buscar produto.');
+            });
+        }
+
+        function filtrarProdutos() {
+            const searchTerm = document.getElementById('searchProduto').value.toLowerCase();
+            const categoriaFilter = document.getElementById('filterCategoria').value;
+            const statusFilter = document.getElementById('filterStatus').value;
+            const rows = document.querySelectorAll('#produtosTableBody tr');
+            
+            rows.forEach(row => {
+                const nome = row.cells[1].textContent.toLowerCase();
+                const codigo = row.cells[0].textContent.toLowerCase();
+                const categoria = row.cells[2].textContent;
+                const status = row.querySelector('td:nth-child(6) .badge').textContent.trim();
+                
+                const matchesSearch = nome.includes(searchTerm) || codigo.includes(searchTerm);
+                const matchesCategoria = !categoriaFilter || categoria === categoriaFilter;
+                const matchesStatus = !statusFilter || status === statusFilter;
+                
+                if (matchesSearch && matchesCategoria && matchesStatus) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        document.getElementById('searchProduto').addEventListener('input', filtrarProdutos);
+        document.getElementById('filterCategoria').addEventListener('change', filtrarProdutos);
+        document.getElementById('filterStatus').addEventListener('change', filtrarProdutos);
+
+        document.getElementById('modalProduto').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('formProduto').reset();
+            document.querySelector('.modal-title').textContent = 'Cadastrar Produto';
+            document.querySelector('[name="id"]').value = '';
+        });
+        
+        /*]]>*/
+    </script>
+</div>
+</html>

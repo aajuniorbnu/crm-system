@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="@{layout :: layout(titulo='Clientes', pagina='clientes', conteudo=~{::content})}">
+    <head><link rel="stylesheet" href="/src/main/resources/static/css/styles.css"></head>
+<div th:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Gerenciamento de Clientes</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCliente">
+            <i class="bi bi-plus-circle"></i> Novo Cliente
+        </button>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <input type="text" class="form-control" id="searchCliente" placeholder="Buscar por nome...">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <select class="form-select" id="filterStatus">
+                        <option value="">Todos os Status</option>
+                        <option value="ATIVO">Ativo</option>
+                        <option value="INATIVO">Inativo</option>
+                        <option value="PROSPECTO">Prospecto</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <button class="btn btn-secondary w-100" onclick="filtrarClientes()">
+                        <i class="bi bi-funnel"></i> Filtrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Clientes -->
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Telefone</th>
+                        <th>Tipo</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="clientesTableBody">
+                    <tr th:each="cliente : ${clientes}">
+                        <td th:text="${cliente.id}"></td>
+                        <td th:text="${cliente.nome}"></td>
+                        <td th:text="${cliente.email}"></td>
+                        <td th:text="${cliente.telefone}"></td>
+                        <td>
+                            <span th:text="${cliente.tipo == 'PESSOA_FISICA'} ? 'Pessoa Física' : 'Pessoa Jurídica'"></span>
+                        </td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${cliente.status == 'ATIVO'} ? 'bg-success' : (${cliente.status == 'PROSPECTO'} ? 'bg-warning' : 'bg-secondary')"
+                                  th:text="${cliente.status}"></span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-info" th:onclick="'verCliente(' + ${cliente.id} + ')'" title="Visualizar">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-warning" th:onclick="'editarCliente(' + ${cliente.id} + ')'" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" th:onclick="'deletarCliente(' + ${cliente.id} + ')'" title="Excluir">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Cadastrar/Editar Cliente -->
+    <div class="modal fade" id="modalCliente" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cadastrar Cliente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formCliente">
+                        <input type="hidden" id="clienteId" name="id">
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nome *</label>
+                                <input type="text" class="form-control" name="nome" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" name="email" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Telefone</label>
+                                <input type="text" class="form-control" name="telefone" placeholder="(00) 00000-0000">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">CPF/CNPJ</label>
+                                <input type="text" class="form-control" name="cpfCnpj" placeholder="000.000.000-00">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Tipo</label>
+                                <select class="form-select" name="tipo">
+                                    <option value="PESSOA_FISICA">Pessoa Física</option>
+                                    <option value="PESSOA_JURIDICA">Pessoa Jurídica</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" name="status">
+                                    <option value="ATIVO">Ativo</option>
+                                    <option value="PROSPECTO">Prospecto</option>
+                                    <option value="INATIVO">Inativo</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Endereço</label>
+                            <input type="text" class="form-control" name="endereco" placeholder="Rua, número">
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-5 mb-3">
+                                <label class="form-label">Cidade</label>
+                                <input type="text" class="form-control" name="cidade">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Estado</label>
+                                <select class="form-select" name="estado">
+                                    <option value="">Selecione</option>
+                                    <option value="SC">Santa Catarina</option>
+                                    <option value="SP">São Paulo</option>
+                                    <option value="RJ">Rio de Janeiro</option>
+                                    <option value="PR">Paraná</option>
+                                    <option value="RS">Rio Grande do Sul</option>
+                                    <!-- Adicione mais estados conforme necessário -->
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">CEP</label>
+                                <input type="text" class="form-control" name="cep" placeholder="00000-000">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="salvarCliente()">
+                        <i class="bi bi-check-lg"></i> Salvar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        
+        // Salvar ou atualizar cliente
+        function salvarCliente() {
+            const form = document.getElementById('formCliente');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+            
+            // Remove o ID se estiver vazio
+            if (!data.id) {
+                delete data.id;
+            }
+            
+            const method = data.id ? 'PUT' : 'POST';
+            const url = data.id ? `/api/clientes/${data.id}` : '/api/clientes';
+
+            fetch(url, {
+                method: method,
+                headers: { 
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro ao salvar cliente');
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert('Cliente salvo com sucesso!');
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao salvar cliente. Por favor, tente novamente.');
+            });
+        }
+
+        // Deletar cliente
+        function deletarCliente(id) {
+            if (confirm('Deseja realmente deletar este cliente?')) {
+                fetch(`/api/clientes/${id}`, { 
+                    method: 'DELETE' 
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Cliente deletado com sucesso!');
+                        location.reload();
+                    } else {
+                        throw new Error('Erro ao deletar cliente');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao deletar cliente. Por favor, tente novamente.');
+                });
+            }
+        }
+
+        // Ver detalhes do cliente
+        function verCliente(id) {
+            fetch(`/api/clientes/${id}`)
+            .then(response => response.json())
+            .then(cliente => {
+                alert(`Cliente: ${cliente.nome}\nEmail: ${cliente.email}\nTelefone: ${cliente.telefone || 'N/A'}`);
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao buscar cliente.');
+            });
+        }
+
+        // Editar cliente
+        function editarCliente(id) {
+            fetch(`/api/clientes/${id}`)
+            .then(response => response.json())
+            .then(cliente => {
+                document.querySelector('[name="id"]').value = cliente.id;
+                document.querySelector('[name="nome"]').value = cliente.nome;
+                document.querySelector('[name="email"]').value = cliente.email;
+                document.querySelector('[name="telefone"]').value = cliente.telefone || '';
+                document.querySelector('[name="cpfCnpj"]').value = cliente.cpfCnpj || '';
+                document.querySelector('[name="tipo"]').value = cliente.tipo;
+                document.querySelector('[name="status"]').value = cliente.status;
+                document.querySelector('[name="endereco"]').value = cliente.endereco || '';
+                document.querySelector('[name="cidade"]').value = cliente.cidade || '';
+                document.querySelector('[name="estado"]').value = cliente.estado || '';
+                document.querySelector('[name="cep"]').value = cliente.cep || '';
+                
+                document.querySelector('.modal-title').textContent = 'Editar Cliente';
+                
+                const modal = new bootstrap.Modal(document.getElementById('modalCliente'));
+                modal.show();
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao buscar cliente.');
+            });
+        }
+
+        // Filtrar clientes (implementação básica)
+        function filtrarClientes() {
+            const searchTerm = document.getElementById('searchCliente').value.toLowerCase();
+            const statusFilter = document.getElementById('filterStatus').value;
+            const rows = document.querySelectorAll('#clientesTableBody tr');
+            
+            rows.forEach(row => {
+                const nome = row.cells[1].textContent.toLowerCase();
+                const status = row.querySelector('.badge').textContent.trim();
+                
+                const matchesSearch = nome.includes(searchTerm);
+                const matchesStatus = !statusFilter || status === statusFilter;
+                
+                if (matchesSearch && matchesStatus) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Busca em tempo real
+        document.getElementById('searchCliente').addEventListener('input', filtrarClientes);
+        document.getElementById('filterStatus').addEventListener('change', filtrarClientes);
+
+        // Limpar formulário ao fechar modal
+        document.getElementById('modalCliente').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('formCliente').reset();
+            document.querySelector('.modal-title').textContent = 'Cadastrar Cliente';
+            document.querySelector('[name="id"]').value = '';
+        });
+        
+        /*]]>*/
+    </script>
+</div>
+</html>
