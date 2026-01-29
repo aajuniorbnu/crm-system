@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(titulo='Relatórios', pagina='relatorios', 
-conteudo=~{::content})}">
-<head><link rel="stylesheet" href="/src/main/resources/static/css/styles.css"></head>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head><link rel="stylesheet" href="/src/main/resources/static/css/styles.css"></head>
+    <body th:replace="~{layout :: layout(titulo='Relatórios', pagina='relatorios', conteudo=~{::content})}"></body>
 
 <div th:fragment="content">
     <h2>Relatórios</h2>

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(titulo='Tickets', pagina='tickets', conteudo=~{::content})}">
+<html xmlns:th="http://www.thymeleaf.org">
     <head><link rel="stylesheet" href="/src/main/resources/static/css/styles.css"></head>
+    <body th:replace="~{layout :: layout(titulo='Tickets', pagina='tickets', conteudo=~{::content})}"></body>
 <div th:fragment="content">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Gerenciamento de Tickets</h2>
