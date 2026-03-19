@@ -187,7 +187,6 @@ public class VendaService extends BaseService<Venda, Long> {
     }
 
     public List<Venda> listarTodas() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'listarTodas'");
+        return listarTodos();
     }
 }
