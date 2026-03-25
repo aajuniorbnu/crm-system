@@ -12,6 +12,7 @@ import java.util.List;
 public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     List<Produto> findByStatus(StatusProduto status);
     List<Produto> findByCategoria(String categoria);
+    boolean existsByCodigo(String codigo);
 
     @Query("SELECT p FROM Produto p WHERE p.estoque <= p.estoqueMinimo")
     List<Produto> findProdutosEstoqueBaixo();

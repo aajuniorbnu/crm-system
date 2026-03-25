@@ -208,10 +208,23 @@ CRUD endpoints are available for all main resources:
 - New tickets receive `dataAbertura` automatically and default to `ABERTO` with `MEDIA` priority
 - Tickets marked as `RESOLVIDO` or `FECHADO` receive `dataFechamento`
 
+## Seed Data
+
+On startup, the application now preloads:
+
+- a smartphone stock base in `produtos` with Apple and Samsung models
+- a customer base in `clientes` with individual and company records
+
+The load is idempotent:
+
+- products are inserted only when their `codigo` does not already exist
+- customers are inserted only when their `email` does not already exist
+
+The reference prices for the seeded smartphones were based on market prices checked on `2026-03-25`.
+
 ## Notes
 
 - The database schema is created and updated automatically on startup
-- There is currently no seed data configured in the project
 - The frontend is server-rendered with Thymeleaf templates under `src/main/resources/templates`
 
 ## Useful Commands
