@@ -1,5 +1,6 @@
 package com.empresa.crm_system;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.empresa.crm_system.enums.FormaPagamento;
 import com.empresa.crm_system.enums.StatusVenda;
 import jakarta.persistence.*;
@@ -15,6 +16,7 @@ public class Venda {
     
     @ManyToOne
     @JoinColumn(name = "cliente_id")
+    @JsonIgnoreProperties({"vendas", "tickets"})
     private Cliente cliente;
     
     private LocalDateTime dataVenda;
@@ -29,6 +31,7 @@ public class Venda {
     private FormaPagamento formaPagamento;
     
     @OneToMany(mappedBy = "venda", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties({"venda"})
     private List<ItemVenda> itens;
     
     // Getters e Setters

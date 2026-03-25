@@ -1,5 +1,6 @@
 package com.empresa.crm_system;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.empresa.crm_system.enums.PrioridadeTicket;
 import com.empresa.crm_system.enums.StatusTicket;
 import jakarta.persistence.*;
@@ -14,6 +15,7 @@ public class Ticket {
     
     @ManyToOne
     @JoinColumn(name = "cliente_id")
+    @JsonIgnoreProperties({"vendas", "tickets"})
     private Cliente cliente;
     
     private String assunto;

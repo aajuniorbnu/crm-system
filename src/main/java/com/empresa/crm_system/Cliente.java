@@ -1,5 +1,6 @@
 package com.empresa.crm_system;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.empresa.crm_system.enums.StatusCliente;
 import com.empresa.crm_system.enums.TipoCliente;
 import jakarta.persistence.*;
@@ -8,6 +9,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "clientes")
+@JsonIgnoreProperties({"vendas", "tickets", "hibernateLazyInitializer", "handler"})
 public class Cliente {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

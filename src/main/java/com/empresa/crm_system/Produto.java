@@ -1,11 +1,13 @@
 package com.empresa.crm_system;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.empresa.crm_system.enums.StatusProduto;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "produtos")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Produto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

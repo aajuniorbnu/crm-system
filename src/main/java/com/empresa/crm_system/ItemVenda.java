@@ -1,9 +1,11 @@
 package com.empresa.crm_system;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "itens_venda")
+@JsonIgnoreProperties({"venda", "hibernateLazyInitializer", "handler"})
 public class ItemVenda {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

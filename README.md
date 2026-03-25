@@ -222,6 +222,24 @@ The load is idempotent:
 
 The reference prices for the seeded smartphones were based on market prices checked on `2026-03-25`.
 
+## Local SQL Databases
+
+The repository also includes standalone PostgreSQL scripts for two local databases:
+
+- `database/local/00-create-databases.sql`
+- `database/local/01-estoque-smartphones.sql`
+- `database/local/02-clientes.sql`
+
+Suggested local execution with `psql`:
+
+```bash
+psql -U postgres -d postgres -f database/local/00-create-databases.sql
+psql -U postgres -d postgres -f database/local/01-estoque-smartphones.sql
+psql -U postgres -d postgres -f database/local/02-clientes.sql
+```
+
+The `estoque_smartphones` database stores Apple and Samsung smartphone inventory with market-reference prices, and the `clientes_crm` database stores a dedicated customer base.
+
 ## Notes
 
 - The database schema is created and updated automatically on startup

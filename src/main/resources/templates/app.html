@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/src/main/resources/static/css/styles.css" th:href="@{/css/styles.css}">
+</head>
+<body th:attr="data-pagina=${pagina},data-base-url=@{/}">
+    <div class="app-shell">
+        <aside class="sidebar" id="sidebar">
+            <div class="brand-block">
+                <span class="brand-kicker">Painel operacional</span>
+                <h1>CRM System</h1>
+                <p>Clientes, estoque, vendas e suporte em uma interface responsiva e preparada para uso local ou publicado.</p>
+            </div>
+
+            <nav class="nav-stack">
+                <a th:href="@{/dashboard}" th:classappend="${pagina == 'dashboard'} ? 'active' : ''">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a th:href="@{/clientes}" th:classappend="${pagina == 'clientes'} ? 'active' : ''">
+                    <i class="bi bi-people"></i>
+                    <span>Clientes</span>
+                </a>
+                <a th:href="@{/produtos}" th:classappend="${pagina == 'produtos'} ? 'active' : ''">
+                    <i class="bi bi-phone"></i>
+                    <span>Produtos</span>
+                </a>
+                <a th:href="@{/vendas}" th:classappend="${pagina == 'vendas'} ? 'active' : ''">
+                    <i class="bi bi-bag-check"></i>
+                    <span>Vendas</span>
+                </a>
+                <a th:href="@{/tickets}" th:classappend="${pagina == 'tickets'} ? 'active' : ''">
+                    <i class="bi bi-headset"></i>
+                    <span>Tickets</span>
+                </a>
+                <a th:href="@{/relatorios}" th:classappend="${pagina == 'relatorios'} ? 'active' : ''">
+                    <i class="bi bi-graph-up"></i>
+                    <span>Relatorios</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-card">
+                <span>Ambiente</span>
+                <strong>Compatível com local e deploy Spring</strong>
+                <code>Thymeleaf + rotas relativas</code>
+            </div>
+        </aside>
+
+        <main class="content-area">
+            <header class="topbar">
+                <button class="menu-toggle" type="button" id="menuToggle" aria-label="Abrir menu">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div class="topbar-copy">
+                    <span class="hero-kicker">CRM integrado</span>
+                    <h2>Gestão clara, rápida e preparada para qualquer tela.</h2>
+                </div>
+                <div class="hero-actions">
+                    <a class="btn btn-neon btn-neon-cyan" th:href="@{/clientes}">Clientes</a>
+                    <a class="btn btn-neon btn-neon-lime" th:href="@{/produtos}">Estoque</a>
+                    <a class="btn btn-neon btn-neon-pink" th:href="@{/vendas}">Vendas</a>
+                    <a class="btn btn-neon btn-neon-orange" th:href="@{/relatorios}">Relatorios</a>
+                </div>
+            </header>
+
+            <section class="hero-panel">
+                <div class="hero-copy">
+                    <span class="hero-kicker">Visão central</span>
+                    <h3>Interface responsiva com fundo cinza claro e ações em neon.</h3>
+                    <p>O painel foi desenhado para funcionar bem em desktop, tablet e celular, mantendo a mesma base HTML renderizada pelo Spring Boot.</p>
+                </div>
+                <div class="hero-highlight">
+                    <span>Navegação ativa</span>
+                    <strong th:text="${pagina}">dashboard</strong>
+                    <small>Dados carregados no servidor e operações via API REST.</small>
+                </div>
+            </section>
+
+            <section class="stats-grid section-anchor" id="dashboard-section" th:classappend="${pagina == 'dashboard'} ? ' section-focus' : ''">
+                <article class="metric-card">
+                    <div class="metric-icon metric-cyan"><i class="bi bi-people-fill"></i></div>
+                    <div>
+                        <span>Total de clientes</span>
+                        <strong th:text="${totalClientes}">0</strong>
+                        <small>Base ativa do relacionamento</small>
+                    </div>
+                </article>
+                <article class="metric-card">
+                    <div class="metric-icon metric-lime"><i class="bi bi-currency-dollar"></i></div>
+                    <div>
+                        <span>Vendas no mes</span>
+                        <strong th:text="${vendasMes}">0</strong>
+                        <small th:text="${'Faturamento: R$ ' + #numbers.formatDecimal(faturamentoMes, 1, 2)}">Faturamento: R$ 0,00</small>
+                    </div>
+                </article>
+                <article class="metric-card">
+                    <div class="metric-icon metric-orange"><i class="bi bi-box-seam-fill"></i></div>
+                    <div>
+                        <span>Produtos ativos</span>
+                        <strong th:text="${totalProdutos}">0</strong>
+                        <small th:text="${'Estoque: R$ ' + #numbers.formatDecimal(valorEstoque, 1, 2)}">Estoque: R$ 0,00</small>
+                    </div>
+                </article>
+                <article class="metric-card">
+                    <div class="metric-icon metric-pink"><i class="bi bi-headset"></i></div>
+                    <div>
+                        <span>Tickets abertos</span>
+                        <strong th:text="${ticketsAbertos}">0</strong>
+                        <small th:text="${ticketsResolvidos + ' resolvidos'}">0 resolvidos</small>
+                    </div>
+                </article>
+            </section>
+
+            <section class="panel-grid">
+                <article class="content-card">
+                    <div class="content-card-header">
+                        <div>
+                            <span class="eyebrow">Radar comercial</span>
+                            <h3>Ultimas vendas</h3>
+                        </div>
+                        <a class="btn btn-sm btn-neon btn-neon-cyan" th:href="@{/vendas}">Abrir vendas</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Cliente</th>
+                                    <th>Valor final</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${#lists.isEmpty(ultimasVendas)}">
+                                    <td colspan="4" class="empty-state">Nenhuma venda registrada.</td>
+                                </tr>
+                                <tr th:each="venda : ${ultimasVendas}">
+                                    <td th:text="${venda.id}">1</td>
+                                    <td th:text="${venda.cliente != null ? venda.cliente.nome : 'N/A'}">Cliente</td>
+                                    <td th:text="${'R$ ' + #numbers.formatDecimal(venda.valorFinal, 1, 2)}">R$ 0,00</td>
+                                    <td><span class="soft-badge" th:text="${venda.status}">PENDENTE</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+
+                <article class="content-card">
+                    <div class="content-card-header">
+                        <div>
+                            <span class="eyebrow">Alerta</span>
+                            <h3>Estoque em observacao</h3>
+                        </div>
+                        <a class="btn btn-sm btn-neon btn-neon-lime" th:href="@{/produtos}">Abrir estoque</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Produto</th>
+                                    <th>Estoque</th>
+                                    <th>Minimo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${#lists.isEmpty(produtosEstoqueBaixo)}">
+                                    <td colspan="3" class="empty-state">Nenhum produto em nivel critico.</td>
+                                </tr>
+                                <tr th:each="produto : ${produtosEstoqueBaixo}">
+                                    <td th:text="${produto.nome}">Produto</td>
+                                    <td th:text="${produto.estoque}">0</td>
+                                    <td th:text="${produto.estoqueMinimo}">0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+            </section>
+
+            <section class="content-card section-anchor" id="clientes-section" th:classappend="${pagina == 'clientes'} ? ' section-focus' : ''">
+                <div class="content-card-header">
+                    <div>
+                        <span class="eyebrow">CRM</span>
+                        <h3>Clientes</h3>
+                    </div>
+                    <button class="btn btn-neon btn-neon-cyan" data-bs-toggle="modal" data-bs-target="#modalCliente" onclick="resetClienteForm()">Novo cliente</button>
+                </div>
+                <div class="toolbar-grid">
+                    <input type="text" class="form-control" id="searchCliente" placeholder="Buscar por nome, email ou cidade">
+                    <select class="form-select" id="filterClienteStatus">
+                        <option value="">Todos os status</option>
+                        <option value="ATIVO">ATIVO</option>
+                        <option value="INATIVO">INATIVO</option>
+                        <option value="PROSPECTO">PROSPECTO</option>
+                        <option value="BLOQUEADO">BLOQUEADO</option>
+                    </select>
+                    <button class="btn btn-neon btn-neon-lime" onclick="filtrarClientes()">Filtrar</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Telefone</th>
+                                <th>Tipo</th>
+                                <th>Status</th>
+                                <th>Acoes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clientesTableBody">
+                            <tr th:each="cliente : ${clientes}" th:attr="data-search=${(cliente.nome ?: '') + ' ' + (cliente.email ?: '') + ' ' + (cliente.cidade ?: '')},data-status=${cliente.status}">
+                                <td th:text="${cliente.id}">1</td>
+                                <td th:text="${cliente.nome}">Nome</td>
+                                <td th:text="${cliente.email}">email</td>
+                                <td th:text="${cliente.telefone}">telefone</td>
+                                <td th:text="${cliente.tipo}">tipo</td>
+                                <td><span class="soft-badge" th:text="${cliente.status}">ATIVO</span></td>
+                                <td class="actions-cell">
+                                    <button class="btn btn-sm btn-neon btn-neon-cyan" th:onclick="'verCliente(' + ${cliente.id} + ')'">Ver</button>
+                                    <button class="btn btn-sm btn-neon btn-neon-lime" th:onclick="'editarCliente(' + ${cliente.id} + ')'">Editar</button>
+                                    <button class="btn btn-sm btn-neon btn-neon-pink" th:onclick="'deletarCliente(' + ${cliente.id} + ')'">Excluir</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="content-card section-anchor" id="produtos-section" th:classappend="${pagina == 'produtos'} ? ' section-focus' : ''">
+                <div class="content-card-header">
+                    <div>
+                        <span class="eyebrow">Estoque</span>
+                        <h3>Produtos</h3>
+                    </div>
+                    <button class="btn btn-neon btn-neon-lime" data-bs-toggle="modal" data-bs-target="#modalProduto" onclick="resetProdutoForm()">Novo produto</button>
+                </div>
+                <div class="mini-stats">
+                    <div><span>Total</span><strong th:text="${totalProdutos}">0</strong></div>
+                    <div><span>Valor em estoque</span><strong th:text="${'R$ ' + #numbers.formatDecimal(valorEstoque, 1, 2)}">R$ 0,00</strong></div>
+                    <div><span>Estoque baixo</span><strong th:text="${#lists.size(produtosEstoqueBaixo)}">0</strong></div>
+                </div>
+                <div class="toolbar-grid toolbar-grid-products">
+                    <input type="text" class="form-control" id="searchProduto" placeholder="Buscar por nome, codigo ou categoria">
+                    <select class="form-select" id="filterProdutoStatus">
+                        <option value="">Todos os status</option>
+                        <option value="ATIVO">ATIVO</option>
+                        <option value="INATIVO">INATIVO</option>
+                        <option value="ESGOTADO">ESGOTADO</option>
+                    </select>
+                    <button class="btn btn-neon btn-neon-orange" onclick="filtrarProdutos()">Filtrar</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Codigo</th>
+                                <th>Nome</th>
+                                <th>Categoria</th>
+                                <th>Preco</th>
+                                <th>Estoque</th>
+                                <th>Status</th>
+                                <th>Acoes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="produtosTableBody">
+                            <tr th:each="produto : ${produtos}" th:attr="data-search=${(produto.nome ?: '') + ' ' + (produto.codigo ?: '') + ' ' + (produto.categoria ?: '')},data-status=${produto.status}">
+                                <td th:text="${produto.codigo}">COD</td>
+                                <td th:text="${produto.nome}">Produto</td>
+                                <td th:text="${produto.categoria}">Categoria</td>
+                                <td th:text="${'R$ ' + #numbers.formatDecimal(produto.preco, 1, 2)}">R$ 0,00</td>
+                                <td th:text="${produto.estoque}">0</td>
+                                <td><span class="soft-badge" th:text="${produto.status}">ATIVO</span></td>
+                                <td class="actions-cell">
+                                    <button class="btn btn-sm btn-neon btn-neon-cyan" th:onclick="'verProduto(' + ${produto.id} + ')'">Ver</button>
+                                    <button class="btn btn-sm btn-neon btn-neon-lime" th:onclick="'editarProduto(' + ${produto.id} + ')'">Editar</button>
+                                    <button class="btn btn-sm btn-neon btn-neon-pink" th:onclick="'deletarProduto(' + ${produto.id} + ')'">Excluir</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="content-card section-anchor" id="vendas-section" th:classappend="${pagina == 'vendas'} ? ' section-focus' : ''">
+                <div class="content-card-header">
+                    <div>
+                        <span class="eyebrow">Comercial</span>
+                        <h3>Vendas</h3>
+                    </div>
+                    <button class="btn btn-neon btn-neon-pink" data-bs-toggle="modal" data-bs-target="#modalVenda" onclick="resetVendaForm()">Nova venda</button>
+                </div>
+                <div class="toolbar-grid toolbar-grid-sales">
+                    <input type="date" class="form-control" id="dataInicioVenda">
+                    <input type="date" class="form-control" id="dataFimVenda">
+                    <select class="form-select" id="filterVendaStatus">
+                        <option value="">Todos os status</option>
+                        <option value="PENDENTE">PENDENTE</option>
+                        <option value="APROVADA">APROVADA</option>
+                        <option value="CANCELADA">CANCELADA</option>
+                        <option value="ENTREGUE">ENTREGUE</option>
+                    </select>
+                    <button class="btn btn-neon btn-neon-orange" onclick="filtrarVendas()">Filtrar</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Data</th>
+                                <th>Valor final</th>
+                                <th>Status</th>
+                                <th>Pagamento</th>
+                                <th>Acoes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vendasTableBody">
+                            <tr th:each="venda : ${vendas}" th:attr="data-status=${venda.status},data-date=${venda.dataVenda != null ? #temporals.format(venda.dataVenda, 'yyyy-MM-dd') : ''}">
+                                <td th:text="${venda.id}">1</td>
+                                <td th:text="${venda.cliente != null ? venda.cliente.nome : 'N/A'}">Cliente</td>
+                                <td th:text="${venda.dataVenda != null ? #temporals.format(venda.dataVenda, 'dd/MM/yyyy HH:mm') : '-'}">-</td>
+                                <td th:text="${'R$ ' + #numbers.formatDecimal(venda.valorFinal, 1, 2)}">R$ 0,00</td>
+                                <td><span class="soft-badge" th:text="${venda.status}">PENDENTE</span></td>
+                                <td th:text="${venda.formaPagamento}">PIX</td>
+                                <td class="actions-cell">
+                                    <button class="btn btn-sm btn-neon btn-neon-cyan" th:onclick="'verVenda(' + ${venda.id} + ')'">Ver</button>
+                                    <button class="btn btn-sm btn-neon btn-neon-lime" th:onclick="'editarVenda(' + ${venda.id} + ')'">Editar</button>
+                                    <button class="btn btn-sm btn-neon btn-neon-pink" th:onclick="'deletarVenda(' + ${venda.id} + ')'">Excluir</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="content-card section-anchor" id="tickets-section" th:classappend="${pagina == 'tickets'} ? ' section-focus' : ''">
+                <div class="content-card-header">
+                    <div>
+                        <span class="eyebrow">Suporte</span>
+                        <h3>Tickets</h3>
+                    </div>
+                    <button class="btn btn-neon btn-neon-orange" data-bs-toggle="modal" data-bs-target="#modalTicket" onclick="resetTicketForm()">Novo ticket</button>
+                </div>
+                <div class="toolbar-grid toolbar-grid-tickets">
+                    <input type="text" class="form-control" id="searchTicket" placeholder="Buscar por assunto ou cliente">
+                    <select class="form-select" id="filterTicketPrioridade">
+                        <option value="">Todas as prioridades</option>
+                        <option value="BAIXA">BAIXA</option>
+                        <option value="MEDIA">MEDIA</option>
+                        <option value="ALTA">ALTA</option>
+                        <option value="URGENTE">URGENTE</option>
+                    </select>
+                    <select class="form-select" id="filterTicketStatus">
+                        <option value="">Todos os status</option>
+                        <option value="ABERTO">ABERTO</option>
+                        <option value="EM_ANDAMENTO">EM_ANDAMENTO</option>
+                        <option value="AGUARDANDO_CLIENTE">AGUARDANDO_CLIENTE</option>
+                        <option value="RESOLVIDO">RESOLVIDO</option>
+                        <option value="FECHADO">FECHADO</option>
+                    </select>
+                    <button class="btn btn-neon btn-neon-pink" onclick="filtrarTickets()">Filtrar</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Assunto</th>
+                                <th>Prioridade</th>
+                                <th>Status</th>
+                                <th>Abertura</th>
+                                <th>Acoes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ticketsTableBody">
+                            <tr th:each="ticket : ${tickets}" th:attr="data-search=${(ticket.assunto ?: '') + ' ' + (ticket.cliente != null ? ticket.cliente.nome : '')},data-status=${ticket.status},data-priority=${ticket.prioridade}">
+                                <td th:text="${ticket.id}">1</td>
+                                <td th:text="${ticket.cliente != null ? ticket.cliente.nome : 'N/A'}">Cliente</td>
+                                <td th:text="${ticket.assunto}">Assunto</td>
+                                <td><span class="soft-badge" th:text="${ticket.prioridade}">MEDIA</span></td>
+                                <td><span class="soft-badge" th:text="${ticket.status}">ABERTO</span></td>
+                                <td th:text="${ticket.dataAbertura != null ? #temporals.format(ticket.dataAbertura, 'dd/MM/yyyy HH:mm') : '-'}">-</td>
+                                <td class="actions-cell">
+                                    <button class="btn btn-sm btn-neon btn-neon-cyan" th:onclick="'verTicket(' + ${ticket.id} + ')'">Ver</button>
+                                    <button class="btn btn-sm btn-neon btn-neon-lime" th:onclick="'editarTicket(' + ${ticket.id} + ')'">Editar</button>
+                                    <button class="btn btn-sm btn-neon btn-neon-pink" th:onclick="'deletarTicket(' + ${ticket.id} + ')'">Excluir</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="content-card section-anchor" id="relatorios-section" th:classappend="${pagina == 'relatorios'} ? ' section-focus' : ''">
+                <div class="content-card-header">
+                    <div>
+                        <span class="eyebrow">Analise</span>
+                        <h3>Relatorios</h3>
+                    </div>
+                    <button class="btn btn-neon btn-neon-orange" onclick="gerarRelatorios()">Gerar relatorio</button>
+                </div>
+
+                <div class="toolbar-grid toolbar-grid-reports">
+                    <div>
+                        <label class="form-label">Data inicial</label>
+                        <input type="date" class="form-control" id="dataInicioRelatorio">
+                    </div>
+                    <div>
+                        <label class="form-label">Data final</label>
+                        <input type="date" class="form-control" id="dataFimRelatorio">
+                    </div>
+                    <div class="report-actions">
+                        <button class="btn btn-neon btn-neon-cyan" onclick="exportarCSV('clientes')">CSV clientes</button>
+                        <button class="btn btn-neon btn-neon-lime" onclick="exportarCSV('status')">CSV status</button>
+                        <button class="btn btn-neon btn-neon-pink" onclick="exportarPDF()">Imprimir/PDF</button>
+                    </div>
+                </div>
+
+                <div class="report-metrics">
+                    <article><span>Total de vendas</span><strong id="totalVendasRelatorio">0</strong></article>
+                    <article><span>Faturamento</span><strong id="faturamentoRelatorio">R$ 0,00</strong></article>
+                    <article><span>Novos clientes</span><strong id="novosClientesRelatorio">0</strong></article>
+                    <article><span>Tickets resolvidos</span><strong id="ticketsResolvidosRelatorio">0</strong></article>
+                </div>
+
+                <div class="panel-grid">
+                    <article class="content-subcard">
+                        <h4>Top clientes</h4>
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Cliente</th>
+                                        <th>Compras</th>
+                                        <th>Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="topClientesRelatorio">
+                                    <tr><td colspan="3" class="empty-state">Selecione um periodo para gerar o relatorio.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+
+                    <article class="content-subcard">
+                        <h4>Vendas por status</h4>
+                        <div class="status-grid">
+                            <div><span>Pendentes</span><strong id="vendasPendentes">0</strong></div>
+                            <div><span>Aprovadas</span><strong id="vendasAprovadas">0</strong></div>
+                            <div><span>Canceladas</span><strong id="vendasCanceladas">0</strong></div>
+                            <div><span>Entregues</span><strong id="vendasEntregues">0</strong></div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="modal fade" id="modalCliente" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cliente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formCliente">
+                        <input type="hidden" name="id">
+                        <div class="row g-3">
+                            <div class="col-md-6"><label class="form-label">Nome</label><input class="form-control" name="nome" required></div>
+                            <div class="col-md-6"><label class="form-label">Email</label><input class="form-control" name="email" type="email" required></div>
+                            <div class="col-md-6"><label class="form-label">Telefone</label><input class="form-control" name="telefone"></div>
+                            <div class="col-md-6"><label class="form-label">CPF/CNPJ</label><input class="form-control" name="cpfCnpj"></div>
+                            <div class="col-md-6"><label class="form-label">Tipo</label><select class="form-select" name="tipo"><option value="PESSOA_FISICA">PESSOA_FISICA</option><option value="PESSOA_JURIDICA">PESSOA_JURIDICA</option></select></div>
+                            <div class="col-md-6"><label class="form-label">Status</label><select class="form-select" name="status"><option value="ATIVO">ATIVO</option><option value="PROSPECTO">PROSPECTO</option><option value="INATIVO">INATIVO</option><option value="BLOQUEADO">BLOQUEADO</option></select></div>
+                            <div class="col-12"><label class="form-label">Endereco</label><input class="form-control" name="endereco"></div>
+                            <div class="col-md-5"><label class="form-label">Cidade</label><input class="form-control" name="cidade"></div>
+                            <div class="col-md-3"><label class="form-label">Estado</label><input class="form-control" name="estado"></div>
+                            <div class="col-md-4"><label class="form-label">CEP</label><input class="form-control" name="cep"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-neon btn-neon-pink" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-neon btn-neon-cyan" onclick="salvarCliente()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalProduto" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Produto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formProduto">
+                        <input type="hidden" name="id">
+                        <div class="row g-3">
+                            <div class="col-md-8"><label class="form-label">Nome</label><input class="form-control" name="nome" required></div>
+                            <div class="col-md-4"><label class="form-label">Codigo</label><input class="form-control" name="codigo" required></div>
+                            <div class="col-12"><label class="form-label">Descricao</label><textarea class="form-control" name="descricao" rows="3"></textarea></div>
+                            <div class="col-md-4"><label class="form-label">Categoria</label><input class="form-control" name="categoria"></div>
+                            <div class="col-md-4"><label class="form-label">Preco</label><input class="form-control" name="preco" type="number" step="0.01" required></div>
+                            <div class="col-md-4"><label class="form-label">Unidade</label><input class="form-control" name="unidadeMedida" value="UN"></div>
+                            <div class="col-md-4"><label class="form-label">Estoque</label><input class="form-control" name="estoque" type="number" required></div>
+                            <div class="col-md-4"><label class="form-label">Estoque minimo</label><input class="form-control" name="estoqueMinimo" type="number" value="10"></div>
+                            <div class="col-md-4"><label class="form-label">Status</label><select class="form-select" name="status"><option value="ATIVO">ATIVO</option><option value="INATIVO">INATIVO</option><option value="ESGOTADO">ESGOTADO</option></select></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-neon btn-neon-pink" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-neon btn-neon-lime" onclick="salvarProduto()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalVenda" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Venda</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formVenda">
+                        <input type="hidden" name="id">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Cliente</label>
+                                <select class="form-select" name="cliente.id" id="vendaClienteSelect" required>
+                                    <option value="">Selecione</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Forma de pagamento</label>
+                                <select class="form-select" name="formaPagamento" required>
+                                    <option value="DINHEIRO">DINHEIRO</option>
+                                    <option value="CARTAO_CREDITO">CARTAO_CREDITO</option>
+                                    <option value="CARTAO_DEBITO">CARTAO_DEBITO</option>
+                                    <option value="PIX">PIX</option>
+                                    <option value="BOLETO">BOLETO</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4"><label class="form-label">Valor total</label><input class="form-control" name="valorTotal" type="number" step="0.01" required></div>
+                            <div class="col-md-4"><label class="form-label">Desconto</label><input class="form-control" name="desconto" type="number" step="0.01" value="0"></div>
+                            <div class="col-md-4"><label class="form-label">Valor final</label><input class="form-control" name="valorFinal" type="number" step="0.01" readonly></div>
+                            <div class="col-md-12"><label class="form-label">Status</label><select class="form-select" name="status"><option value="PENDENTE">PENDENTE</option><option value="APROVADA">APROVADA</option><option value="CANCELADA">CANCELADA</option><option value="ENTREGUE">ENTREGUE</option></select></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-neon btn-neon-pink" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-neon btn-neon-orange" onclick="salvarVenda()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalTicket" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ticket</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formTicket">
+                        <input type="hidden" name="id">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label">Cliente</label>
+                                <select class="form-select" name="cliente.id" id="ticketClienteSelect" required>
+                                    <option value="">Selecione</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12"><label class="form-label">Assunto</label><input class="form-control" name="assunto" required></div>
+                            <div class="col-md-12"><label class="form-label">Descricao</label><textarea class="form-control" name="descricao" rows="4" required></textarea></div>
+                            <div class="col-md-6"><label class="form-label">Prioridade</label><select class="form-select" name="prioridade"><option value="BAIXA">BAIXA</option><option value="MEDIA">MEDIA</option><option value="ALTA">ALTA</option><option value="URGENTE">URGENTE</option></select></div>
+                            <div class="col-md-6"><label class="form-label">Status</label><select class="form-select" name="status"><option value="ABERTO">ABERTO</option><option value="EM_ANDAMENTO">EM_ANDAMENTO</option><option value="AGUARDANDO_CLIENTE">AGUARDANDO_CLIENTE</option><option value="RESOLVIDO">RESOLVIDO</option><option value="FECHADO">FECHADO</option></select></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-neon btn-neon-pink" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-neon btn-neon-orange" onclick="salvarTicket()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/app.js" th:src="@{/js/app.js}"></script>
+</body>
+</html>
