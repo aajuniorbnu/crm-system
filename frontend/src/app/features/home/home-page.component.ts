@@ -1,4 +1,4 @@
-import { CurrencyPipe, DecimalPipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -18,7 +18,7 @@ import { PropertyCardComponent } from '../../shared/components/property-card/pro
 
 @Component({
   selector: 'app-home-page',
-  imports: [FormsModule, RouterLink, CurrencyPipe, DecimalPipe, PropertyCardComponent],
+  imports: [FormsModule, RouterLink, CurrencyPipe, PropertyCardComponent],
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.scss'
 })

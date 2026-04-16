@@ -13,6 +13,17 @@ This project is organized around four main business areas:
 
 The dashboard also exposes summary metrics such as total customers, sales in the current month, total products, open tickets, recent sales, and low-stock products.
 
+## Real Estate Module
+
+The repository now also includes a real estate experience built on top of the same Spring Boot backend:
+
+- Angular frontend in `frontend/`
+- Responsive catalog for `venda` and `aluguel`
+- Property categories such as apartment, house, penthouse, land, commercial, and rural
+- Square-meter value calculator
+- REST API for property registration and listing
+- Admin panel to create, edit, and delete properties
+
 ## Tech Stack
 
 - Java 17
@@ -23,6 +34,9 @@ The dashboard also exposes summary metrics such as total customers, sales in the
 - PostgreSQL 16
 - Docker Compose
 - Maven Wrapper
+- Angular 21
+- TypeScript
+- SCSS
 
 ## Project Structure
 
@@ -39,6 +53,12 @@ src/main/resources
 ├── static/css        # Styles
 ├── templates         # Thymeleaf templates
 └── application.properties
+
+frontend
+├── src/app/features/home   # Responsive real estate catalog
+├── src/app/features/admin  # Property administration panel
+├── src/app/core            # Models and API service
+└── proxy.conf.json         # Angular dev proxy for Spring API
 ```
 
 ## Main Features
@@ -50,6 +70,10 @@ src/main/resources
 - Ticket management with support lifecycle states
 - REST API for customers, products, sales, and tickets
 - Automatic schema update via Hibernate (`spring.jpa.hibernate.ddl-auto=update`)
+- Real estate REST API with filters and indicators
+- Angular real estate frontend with responsive layout
+- Property registration screen integrated with Spring Boot
+- Square-meter calculator for sales and rentals
 
 ## Domain Model
 
@@ -95,12 +119,26 @@ Represents a support request and includes:
 - `status`: `ABERTO`, `EM_ANDAMENTO`, `AGUARDANDO_CLIENTE`, `RESOLVIDO`, `FECHADO`
 - `dataAbertura`, `dataFechamento`
 
+### Imovel
+
+Represents a real estate listing and includes:
+
+- `codigo`, `titulo`, `descricao`
+- `categoria`: `APARTAMENTO`, `CASA`, `COBERTURA`, `TERRENO`, `COMERCIAL`, `RURAL`
+- `finalidade`: `VENDA` or `ALUGUEL`
+- `status`: `DISPONIVEL`, `RESERVADO`, `VENDIDO`, `ALUGADO`, `INATIVO`
+- `cidade`, `bairro`, `endereco`, `estado`, `cep`
+- `areaM2`, `quartos`, `banheiros`, `vagas`
+- `valor`, `condominio`, `iptu`
+- `destaque`, `imagemUrl`, `dataCadastro`
+
 ## Running Locally
 
 ### Prerequisites
 
 - Java 17 installed
 - Docker and Docker Compose available
+- Node.js 20 or 22 recommended for the Angular frontend
 
 ### 1. Start PostgreSQL
 
@@ -132,6 +170,22 @@ http://localhost:8080
 ```bash
 ./mvnw test
 ```
+
+### 4. Run the Angular real estate frontend
+
+```bash
+cd frontend
+npm install --ignore-scripts
+npm start
+```
+
+The Angular app starts on:
+
+```text
+http://localhost:4200
+```
+
+The dev server proxies `/api` requests to Spring Boot on port `8080`.
 
 ## Configuration
 
@@ -196,6 +250,20 @@ CRUD endpoints are available for all main resources:
 - `PUT /api/tickets/{id}`
 - `DELETE /api/tickets/{id}`
 
+### Imoveis
+
+- `GET /api/imoveis`
+- `GET /api/imoveis?finalidade=VENDA`
+- `GET /api/imoveis?categoria=CASA`
+- `GET /api/imoveis?status=DISPONIVEL`
+- `GET /api/imoveis?cidade=Sao Paulo`
+- `GET /api/imoveis?destaque=true`
+- `GET /api/imoveis/indicadores`
+- `GET /api/imoveis/{id}`
+- `POST /api/imoveis`
+- `PUT /api/imoveis/{id}`
+- `DELETE /api/imoveis/{id}`
+
 ## Business Rules Already Implemented
 
 - New customers receive `dataCadastro` automatically and default to `ATIVO` when status is not informed
@@ -219,6 +287,7 @@ The load is idempotent:
 
 - products are inserted only when their `codigo` does not already exist
 - customers are inserted only when their `email` does not already exist
+- properties are inserted only when their `codigo` does not already exist
 
 The reference prices for the seeded smartphones were based on market prices checked on `2026-03-25`.
 
@@ -244,6 +313,8 @@ The `estoque_smartphones` database stores Apple and Samsung smartphone inventory
 
 - The database schema is created and updated automatically on startup
 - The frontend is server-rendered with Thymeleaf templates under `src/main/resources/templates`
+- The Angular app lives in `frontend/` and is intended for development on `localhost:4200`
+- The current local environment in this workspace uses `Node 25.3.0`; Angular CLI warns about that version, so prefer Node 20 or 22 when running the frontend outside this session
 
 ## Useful Commands
 

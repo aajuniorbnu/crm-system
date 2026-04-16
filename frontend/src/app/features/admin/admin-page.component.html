@@ -183,7 +183,7 @@
         @for (item of imoveis(); track trackByCodigo($index, item)) {
           <article class="list-card">
             <div class="list-card__copy">
-              <span>{{ formatEnumLabel(item.categoria) }} · {{ formatEnumLabel(item.finalidade) }}</span>
+              <span>{{ formatEnumLabel(item.categoria) }} - {{ formatEnumLabel(item.finalidade) }}</span>
               <h3>{{ item.titulo }}</h3>
               <p>{{ item.bairro }}, {{ item.cidade }} / {{ item.estado }}</p>
               <strong>{{ item.valor | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}</strong>
