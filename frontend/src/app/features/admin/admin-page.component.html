@@ -1,0 +1,203 @@
+<section class="admin-hero">
+  <div>
+    <span class="eyebrow">Painel administrativo</span>
+    <h1>Cadastre imoveis para venda e locacao na mesma API.</h1>
+    <p>
+      Aqui voce controla o portfolio, marca destaques e atualiza valores sem sair do frontend Angular.
+    </p>
+  </div>
+
+  <a routerLink="/" class="admin-link">Voltar ao catalogo</a>
+</section>
+
+<section class="summary-grid">
+  <article class="summary-card">
+    <span>Em venda</span>
+    <strong>{{ resumo().venda }}</strong>
+  </article>
+  <article class="summary-card">
+    <span>Em aluguel</span>
+    <strong>{{ resumo().aluguel }}</strong>
+  </article>
+  <article class="summary-card">
+    <span>Destaques</span>
+    <strong>{{ resumo().destaque }}</strong>
+  </article>
+</section>
+
+@if (error()) {
+  <div class="feedback feedback--error">{{ error() }}</div>
+}
+
+@if (success()) {
+  <div class="feedback feedback--success">{{ success() }}</div>
+}
+
+<section class="admin-grid">
+  <article class="panel-card">
+    <div class="panel-head">
+      <div>
+        <span class="eyebrow">Formulario</span>
+        <h2>{{ editingId() ? 'Editar imovel' : 'Novo imovel' }}</h2>
+      </div>
+      <button type="button" class="ghost-button" (click)="novoRegistro()">Limpar</button>
+    </div>
+
+    <form class="admin-form" [formGroup]="form" (ngSubmit)="salvar()">
+      <label>
+        <span>Codigo</span>
+        <input type="text" formControlName="codigo" />
+        @if (controlHasError('codigo')) {
+          <small>Informe um codigo unico.</small>
+        }
+      </label>
+
+      <label class="admin-form__wide">
+        <span>Titulo comercial</span>
+        <input type="text" formControlName="titulo" />
+      </label>
+
+      <label class="admin-form__wide">
+        <span>Descricao</span>
+        <textarea rows="4" formControlName="descricao"></textarea>
+      </label>
+
+      <label>
+        <span>Categoria</span>
+        <select formControlName="categoria">
+          @for (item of categorias; track item) {
+            <option [value]="item">{{ formatEnumLabel(item) }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>Finalidade</span>
+        <select formControlName="finalidade">
+          @for (item of finalidades; track item) {
+            <option [value]="item">{{ formatEnumLabel(item) }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>Status</span>
+        <select formControlName="status">
+          @for (item of statusOptions; track item) {
+            <option [value]="item">{{ formatEnumLabel(item) }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>Cidade</span>
+        <input type="text" formControlName="cidade" />
+      </label>
+
+      <label>
+        <span>Bairro</span>
+        <input type="text" formControlName="bairro" />
+      </label>
+
+      <label class="admin-form__wide">
+        <span>Endereco</span>
+        <input type="text" formControlName="endereco" />
+      </label>
+
+      <label>
+        <span>Estado</span>
+        <input type="text" maxlength="2" formControlName="estado" />
+      </label>
+
+      <label>
+        <span>CEP</span>
+        <input type="text" formControlName="cep" />
+      </label>
+
+      <label>
+        <span>Area m2</span>
+        <input type="number" min="0" formControlName="areaM2" />
+      </label>
+
+      <label>
+        <span>Quartos</span>
+        <input type="number" min="0" formControlName="quartos" />
+      </label>
+
+      <label>
+        <span>Banheiros</span>
+        <input type="number" min="0" formControlName="banheiros" />
+      </label>
+
+      <label>
+        <span>Vagas</span>
+        <input type="number" min="0" formControlName="vagas" />
+      </label>
+
+      <label>
+        <span>Valor</span>
+        <input type="number" min="0" formControlName="valor" />
+      </label>
+
+      <label>
+        <span>Condominio</span>
+        <input type="number" min="0" formControlName="condominio" />
+      </label>
+
+      <label>
+        <span>IPTU</span>
+        <input type="number" min="0" formControlName="iptu" />
+      </label>
+
+      <label class="admin-form__wide">
+        <span>Imagem URL opcional</span>
+        <input type="text" formControlName="imagemUrl" />
+      </label>
+
+      <label class="toggle admin-form__wide">
+        <input type="checkbox" formControlName="destaque" />
+        <span>Marcar como destaque</span>
+      </label>
+
+      <div class="admin-form__actions admin-form__wide">
+        <button type="submit" class="primary-button" [disabled]="saving()">
+          {{ saving() ? 'Salvando...' : editingId() ? 'Atualizar imovel' : 'Cadastrar imovel' }}
+        </button>
+      </div>
+    </form>
+  </article>
+
+  <article class="panel-card">
+    <div class="panel-head">
+      <div>
+        <span class="eyebrow">Portfolio</span>
+        <h2>Imoveis cadastrados</h2>
+      </div>
+      <span class="count-pill">{{ imoveis().length }} itens</span>
+    </div>
+
+    @if (loading()) {
+      <div class="feedback">Carregando lista...</div>
+    } @else if (imoveis().length) {
+      <div class="admin-list">
+        @for (item of imoveis(); track trackByCodigo($index, item)) {
+          <article class="list-card">
+            <div class="list-card__copy">
+              <span>{{ formatEnumLabel(item.categoria) }} · {{ formatEnumLabel(item.finalidade) }}</span>
+              <h3>{{ item.titulo }}</h3>
+              <p>{{ item.bairro }}, {{ item.cidade }} / {{ item.estado }}</p>
+              <strong>{{ item.valor | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}</strong>
+            </div>
+
+            <div class="list-card__actions">
+              <button type="button" class="ghost-button" (click)="editar(item)">Editar</button>
+              <button type="button" class="danger-button" (click)="remover(item)">Excluir</button>
+            </div>
+          </article>
+        }
+      </div>
+    } @else {
+      <div class="feedback">Nenhum imovel cadastrado ainda na API.</div>
+    }
+  </article>
+</section>

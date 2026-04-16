@@ -1,0 +1,270 @@
+:host {
+  display: grid;
+  gap: 1.4rem;
+}
+
+.admin-hero,
+.summary-card,
+.panel-card,
+.feedback {
+  background: rgba(255, 252, 247, 0.9);
+  border: 1px solid rgba(18, 53, 91, 0.08);
+  box-shadow: 0 26px 60px rgba(18, 53, 91, 0.12);
+  backdrop-filter: blur(14px);
+}
+
+.admin-hero,
+.panel-card {
+  border-radius: 1.9rem;
+  padding: clamp(1.3rem, 4vw, 2rem);
+}
+
+.admin-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: start;
+}
+
+.eyebrow {
+  display: inline-flex;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(18, 53, 91, 0.08);
+  color: #12355b;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.admin-hero h1,
+.panel-head h2,
+.list-card h3 {
+  margin: 0;
+  font-family: 'Sora', sans-serif;
+  color: #13233f;
+}
+
+.admin-hero h1 {
+  font-size: clamp(2rem, 4.2vw, 3.6rem);
+  line-height: 0.96;
+  max-width: 12ch;
+}
+
+.admin-hero p,
+.list-card p,
+.feedback,
+.list-card span {
+  color: #5b667f;
+  line-height: 1.7;
+}
+
+.admin-link,
+.ghost-button,
+.primary-button,
+.danger-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.85rem 1.15rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.admin-link:hover,
+.ghost-button:hover,
+.primary-button:hover,
+.danger-button:hover {
+  transform: translateY(-2px);
+}
+
+.admin-link,
+.ghost-button {
+  background: rgba(18, 53, 91, 0.06);
+  color: #12355b;
+  border: 1px solid rgba(18, 53, 91, 0.12);
+}
+
+.primary-button {
+  border: 1px solid transparent;
+  background: linear-gradient(135deg, #ff7e5f, #d04d2f);
+  color: #fffdf8;
+  box-shadow: 0 18px 36px rgba(208, 77, 47, 0.24);
+}
+
+.danger-button {
+  border: 1px solid rgba(163, 42, 42, 0.16);
+  background: rgba(163, 42, 42, 0.08);
+  color: #8a2017;
+}
+
+.summary-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.summary-card {
+  border-radius: 1.6rem;
+  padding: 1.2rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.summary-card span,
+.count-pill {
+  color: #5a6177;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.summary-card strong {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  color: #12355b;
+  font-family: 'Sora', sans-serif;
+}
+
+.count-pill {
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(18, 53, 91, 0.06);
+}
+
+.feedback {
+  padding: 1rem 1.1rem;
+  border-radius: 1.2rem;
+}
+
+.feedback--error {
+  background: rgba(208, 77, 47, 0.12);
+  color: #8a301d;
+}
+
+.feedback--success {
+  background: rgba(95, 111, 82, 0.16);
+  color: #40502e;
+}
+
+.admin-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+}
+
+.panel-card,
+.admin-form,
+.admin-list,
+.list-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: start;
+  margin-bottom: 1rem;
+}
+
+.admin-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-form label {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.admin-form__wide {
+  grid-column: 1 / -1;
+}
+
+.admin-form span,
+.toggle span {
+  color: #47546f;
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.admin-form input,
+.admin-form textarea,
+.admin-form select {
+  width: 100%;
+  border-radius: 1rem;
+  border: 1px solid rgba(18, 53, 91, 0.12);
+  background: #fffcf7;
+  padding: 0.9rem 1rem;
+  color: #1c2944;
+  font: inherit;
+}
+
+.admin-form small {
+  color: #a03c29;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.toggle input {
+  width: auto;
+}
+
+.admin-form__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.list-card {
+  padding: 1rem;
+  border-radius: 1.3rem;
+  background: rgba(18, 53, 91, 0.04);
+}
+
+.list-card__copy {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.list-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.list-card strong {
+  color: #12355b;
+  font-size: 1.35rem;
+}
+
+@media (max-width: 1080px) {
+  .summary-grid,
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-hero,
+  .panel-head,
+  .admin-form__actions {
+    flex-direction: column;
+    align-items: start;
+  }
+
+  .admin-form {
+    grid-template-columns: 1fr;
+  }
+}

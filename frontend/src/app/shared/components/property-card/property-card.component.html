@@ -1,0 +1,41 @@
+@let data = imovel();
+
+<article class="property-card" [ngClass]="toneClass()">
+  <div class="property-card__visual">
+    <span class="property-card__badge">{{ finalidadeLabel() }}</span>
+    <span class="property-card__code">{{ categoriaCode() }}</span>
+    <div class="property-card__location">
+      <strong>{{ data.bairro }}</strong>
+      <span>{{ data.cidade }} / {{ data.estado }}</span>
+    </div>
+  </div>
+
+  <div class="property-card__content">
+    <div class="property-card__topline">
+      <span>{{ formatEnumLabel(data.categoria) }}</span>
+      @if (data.destaque) {
+        <small>Destaque</small>
+      }
+    </div>
+
+    <h3>{{ data.titulo }}</h3>
+    <p>{{ data.descricao }}</p>
+
+    <div class="property-card__specs">
+      <span>{{ data.areaM2 | number: '1.0-0' }} m2</span>
+      <span>{{ data.quartos }} quartos</span>
+      <span>{{ data.banheiros }} banhos</span>
+      <span>{{ data.vagas }} vagas</span>
+    </div>
+
+    <div class="property-card__price">
+      <strong>{{ data.valor | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}</strong>
+      <span>{{ valorMetroQuadrado() | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}/m2</span>
+    </div>
+
+    <div class="property-card__meta">
+      <span>Condominio {{ data.condominio | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}</span>
+      <span>IPTU {{ data.iptu | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}</span>
+    </div>
+  </div>
+</article>

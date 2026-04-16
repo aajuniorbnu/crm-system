@@ -1,0 +1,219 @@
+<section class="hero">
+  <div class="hero__copy">
+    <span class="eyebrow">VistaPrime Imobiliaria</span>
+    <h1>Venda, aluguel e cadastro de imoveis em uma experiencia responsiva.</h1>
+    <p>
+      Um programa imobiliario em Angular + TypeScript com SCSS, filtros por categoria,
+      calculadora por metro quadrado e painel conectado a uma API Spring para novos imoveis.
+    </p>
+
+    <div class="hero__actions">
+      <a routerLink="/painel" class="btn btn--primary">Cadastrar imovel</a>
+      <a href="#calculadora" class="btn btn--ghost">Calcular valor por m2</a>
+    </div>
+  </div>
+
+  <div class="hero__spotlight">
+    <div class="hero__spotlight-card">
+      <span>Imoveis em venda</span>
+      <strong>{{ indicadores().imoveisVendaDisponiveis }}</strong>
+      <small>Media de {{ indicadores().mediaVendaMetroQuadrado | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}/m2</small>
+    </div>
+
+    <div class="hero__spotlight-card hero__spotlight-card--olive">
+      <span>Imoveis em aluguel</span>
+      <strong>{{ indicadores().imoveisAluguelDisponiveis }}</strong>
+      <small>Media de {{ indicadores().mediaAluguelMetroQuadrado | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}/m2</small>
+    </div>
+  </div>
+</section>
+
+<section class="metrics">
+  <article class="metric-card">
+    <span>Total catalogado</span>
+    <strong>{{ indicadores().totalImoveis }}</strong>
+    <small>Base sincronizada com a API de imoveis.</small>
+  </article>
+  <article class="metric-card">
+    <span>Destaques ativos</span>
+    <strong>{{ destaques().length }}</strong>
+    <small>Imoveis em evidencia no catalogo principal.</small>
+  </article>
+  <article class="metric-card">
+    <span>Filtro atual</span>
+    <strong>{{ imoveisFiltrados().length }}</strong>
+    <small>Itens visiveis com a combinacao escolhida.</small>
+  </article>
+</section>
+
+<section class="catalog">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Catalogo</span>
+      <h2>Categorias para venda e locacao</h2>
+    </div>
+    <p>Combine filtros de negocio, tipo de imovel e cidade para navegar mais rapido.</p>
+  </div>
+
+  <div class="catalog__toolbar">
+    <div class="chip-row">
+      <button
+        type="button"
+        class="chip"
+        [class.chip--active]="finalidadeAtiva() === 'TODOS'"
+        (click)="definirFinalidade('TODOS')"
+      >
+        Todos
+      </button>
+      <button
+        type="button"
+        class="chip"
+        [class.chip--active]="finalidadeAtiva() === 'VENDA'"
+        (click)="definirFinalidade('VENDA')"
+      >
+        Venda
+      </button>
+      <button
+        type="button"
+        class="chip"
+        [class.chip--active]="finalidadeAtiva() === 'ALUGUEL'"
+        (click)="definirFinalidade('ALUGUEL')"
+      >
+        Aluguel
+      </button>
+    </div>
+
+    <div class="chip-row">
+      <button
+        type="button"
+        class="chip chip--soft"
+        [class.chip--active]="categoriaAtiva() === 'TODAS'"
+        (click)="definirCategoria('TODAS')"
+      >
+        Todas
+      </button>
+      @for (categoria of categorias; track categoria) {
+        <button
+          type="button"
+          class="chip chip--soft"
+          [class.chip--active]="categoriaAtiva() === categoria"
+          (click)="definirCategoria(categoria)"
+        >
+          {{ formatEnumLabel(categoria) }}
+        </button>
+      }
+    </div>
+
+    <label class="catalog__search">
+      <span>Buscar por cidade ou bairro</span>
+      <input
+        type="text"
+        [ngModel]="cidadeBusca()"
+        (ngModelChange)="atualizarCidade($event)"
+        placeholder="Ex.: Sao Paulo ou Pinheiros"
+      />
+    </label>
+  </div>
+
+  @if (error()) {
+    <div class="feedback feedback--error">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="feedback">Carregando imoveis...</div>
+  } @else if (imoveisFiltrados().length) {
+    <div class="catalog__grid">
+      @for (imovel of imoveisFiltrados(); track imovel.codigo) {
+        <app-property-card [imovel]="imovel" />
+      }
+    </div>
+  } @else {
+    <div class="feedback">Nenhum imovel encontrado para o filtro selecionado.</div>
+  }
+</section>
+
+<section class="highlights">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Selecao</span>
+      <h2>Destaques da semana</h2>
+    </div>
+    <a routerLink="/painel" class="text-link">Abrir painel administrativo</a>
+  </div>
+
+  <div class="highlights__grid">
+    @for (imovel of destaques(); track trackByCodigo($index, imovel)) {
+      <article class="highlight-card">
+        <span>{{ imovel.finalidade === 'VENDA' ? 'Venda premium' : 'Locacao premium' }}</span>
+        <h3>{{ imovel.titulo }}</h3>
+        <p>{{ imovel.bairro }}, {{ imovel.cidade }}</p>
+        <strong>{{ imovel.valor | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}</strong>
+      </article>
+    }
+  </div>
+</section>
+
+<section class="calculator" id="calculadora">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Calculadora</span>
+      <h2>Valor do metro quadrado</h2>
+    </div>
+    <p>Compare um valor informado com a media de mercado que a API retornou.</p>
+  </div>
+
+  <div class="calculator__panel">
+    <div class="calculator__form">
+      <div class="chip-row">
+        <button
+          type="button"
+          class="chip"
+          [class.chip--active]="calculadoraFinalidade() === 'VENDA'"
+          (click)="selecionarCalculadora('VENDA')"
+        >
+          Compra
+        </button>
+        <button
+          type="button"
+          class="chip"
+          [class.chip--active]="calculadoraFinalidade() === 'ALUGUEL'"
+          (click)="selecionarCalculadora('ALUGUEL')"
+        >
+          Aluguel
+        </button>
+      </div>
+
+      <label>
+        <span>Area em metros quadrados</span>
+        <input
+          type="number"
+          min="1"
+          [ngModel]="calculadoraArea()"
+          (ngModelChange)="atualizarCalculadoraArea($event)"
+        />
+      </label>
+
+      <label>
+        <span>Valor total do imovel</span>
+        <input
+          type="number"
+          min="0"
+          [ngModel]="calculadoraValor()"
+          (ngModelChange)="atualizarCalculadoraValor($event)"
+        />
+      </label>
+    </div>
+
+    <div class="calculator__result">
+      <span>Resultado estimado</span>
+      <strong>{{ valorCalculadoMetroQuadrado() | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}/m2</strong>
+      <p>
+        Media atual no catalogo:
+        {{ mediaMercadoSelecionada() | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}/m2
+      </p>
+      <small>
+        Use este bloco para avaliar preco de venda ou aluguel com base em area e valor total.
+      </small>
+    </div>
+  </div>
+</section>

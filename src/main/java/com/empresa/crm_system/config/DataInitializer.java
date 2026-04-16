@@ -1,11 +1,16 @@
 package com.empresa.crm_system.config;
 
 import com.empresa.crm_system.Cliente;
+import com.empresa.crm_system.Imovel;
 import com.empresa.crm_system.Produto;
+import com.empresa.crm_system.enums.CategoriaImovel;
+import com.empresa.crm_system.enums.FinalidadeImovel;
 import com.empresa.crm_system.enums.StatusCliente;
+import com.empresa.crm_system.enums.StatusImovel;
 import com.empresa.crm_system.enums.StatusProduto;
 import com.empresa.crm_system.enums.TipoCliente;
 import com.empresa.crm_system.repository.ClienteRepository;
+import com.empresa.crm_system.repository.ImovelRepository;
 import com.empresa.crm_system.repository.ProdutoRepository;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
@@ -18,10 +23,12 @@ import java.util.List;
 public class DataInitializer {
 
     @Bean
-    ApplicationRunner seedData(ProdutoRepository produtoRepository, ClienteRepository clienteRepository) {
+    ApplicationRunner seedData(ProdutoRepository produtoRepository, ClienteRepository clienteRepository,
+                               ImovelRepository imovelRepository) {
         return args -> {
             seedProdutos(produtoRepository);
             seedClientes(clienteRepository);
+            seedImoveis(imovelRepository);
         };
     }
 
@@ -97,6 +104,49 @@ public class DataInitializer {
         }
     }
 
+    private void seedImoveis(ImovelRepository imovelRepository) {
+        List<Imovel> imoveis = List.of(
+                imovel("SP-CB-001", "Cobertura panoramica com terraco gourmet", CategoriaImovel.COBERTURA,
+                        FinalidadeImovel.VENDA, StatusImovel.DISPONIVEL, "Sao Paulo", "Vila Mariana",
+                        "Rua Joaquim Tavora, 890", "SP", "04015-012", 186.0, 3, 4, 3,
+                        2450000.0, 2100.0, 780.0, true,
+                        "Vista aberta, automacao, suite master e area social integrada."),
+                imovel("SP-AP-002", "Apartamento compacto perto do metrô", CategoriaImovel.APARTAMENTO,
+                        FinalidadeImovel.ALUGUEL, StatusImovel.DISPONIVEL, "Sao Paulo", "Pinheiros",
+                        "Rua dos Pinheiros, 520", "SP", "05422-001", 62.0, 2, 2, 1,
+                        4800.0, 780.0, 190.0, true,
+                        "Ideal para mobilidade urbana com varanda, coworking e lazer completo."),
+                imovel("RJ-CS-003", "Casa com jardim e piscina para familia", CategoriaImovel.CASA,
+                        FinalidadeImovel.VENDA, StatusImovel.DISPONIVEL, "Rio de Janeiro", "Barra da Tijuca",
+                        "Avenida das Americas, 4500", "RJ", "22640-102", 320.0, 4, 5, 4,
+                        3980000.0, 950.0, 620.0, true,
+                        "Projeto contemporaneo, piscina aquecida, espaco gourmet e home office."),
+                imovel("BH-AP-004", "Apartamento com excelente custo-beneficio", CategoriaImovel.APARTAMENTO,
+                        FinalidadeImovel.VENDA, StatusImovel.DISPONIVEL, "Belo Horizonte", "Funcionarios",
+                        "Rua dos Inconfidentes, 321", "MG", "30140-120", 94.0, 3, 2, 2,
+                        920000.0, 540.0, 160.0, false,
+                        "Planta inteligente, iluminacao natural e acesso rapido a servicos."),
+                imovel("CT-CO-005", "Sala comercial pronta para consultorio", CategoriaImovel.COMERCIAL,
+                        FinalidadeImovel.ALUGUEL, StatusImovel.DISPONIVEL, "Curitiba", "Centro",
+                        "Rua Marechal Floriano, 120", "PR", "80020-090", 48.0, 0, 1, 1,
+                        3200.0, 650.0, 145.0, false,
+                        "Espaco versatil com recepcao, elevador e infraestrutura de seguranca."),
+                imovel("GO-TR-006", "Terreno plano em condominio fechado", CategoriaImovel.TERRENO,
+                        FinalidadeImovel.VENDA, StatusImovel.DISPONIVEL, "Goiania", "Jardins Milao",
+                        "Quadra 12, lote 08", "GO", "74370-900", 420.0, 0, 0, 0,
+                        690000.0, 390.0, 90.0, false,
+                        "Terreno regular com clube, seguranca 24h e alto potencial de valorizacao.")
+        );
+
+        List<Imovel> novosImoveis = imoveis.stream()
+                .filter(imovel -> !imovelRepository.existsByCodigo(imovel.getCodigo()))
+                .toList();
+
+        if (!novosImoveis.isEmpty()) {
+            imovelRepository.saveAll(novosImoveis);
+        }
+    }
+
     private Produto produto(String codigo, String nome, String marca, Double preco, Integer estoque,
                             Integer estoqueMinimo, String descricao) {
         Produto produto = new Produto();
@@ -134,5 +184,33 @@ public class DataInitializer {
         }
 
         return cliente;
+    }
+
+    private Imovel imovel(String codigo, String titulo, CategoriaImovel categoria, FinalidadeImovel finalidade,
+                          StatusImovel status, String cidade, String bairro, String endereco, String estado,
+                          String cep, Double areaM2, Integer quartos, Integer banheiros, Integer vagas,
+                          Double valor, Double condominio, Double iptu, Boolean destaque, String descricao) {
+        Imovel imovel = new Imovel();
+        imovel.setCodigo(codigo);
+        imovel.setTitulo(titulo);
+        imovel.setCategoria(categoria);
+        imovel.setFinalidade(finalidade);
+        imovel.setStatus(status);
+        imovel.setCidade(cidade);
+        imovel.setBairro(bairro);
+        imovel.setEndereco(endereco);
+        imovel.setEstado(estado);
+        imovel.setCep(cep);
+        imovel.setAreaM2(areaM2);
+        imovel.setQuartos(quartos);
+        imovel.setBanheiros(banheiros);
+        imovel.setVagas(vagas);
+        imovel.setValor(valor);
+        imovel.setCondominio(condominio);
+        imovel.setIptu(iptu);
+        imovel.setDestaque(destaque);
+        imovel.setDescricao(descricao);
+        imovel.setDataCadastro(LocalDateTime.now().minusDays(15));
+        return imovel;
     }
 }

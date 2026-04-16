@@ -1,0 +1,38 @@
+<div class="shell">
+  <div class="shell__glow shell__glow--top"></div>
+  <div class="shell__glow shell__glow--bottom"></div>
+
+  <header class="site-header">
+    <a routerLink="/" class="brand">
+      <span class="brand__mark">VP</span>
+      <div>
+        <strong>VistaPrime</strong>
+        <small>Imobiliaria digital</small>
+      </div>
+    </a>
+
+    <nav class="site-nav">
+      @for (item of navigation; track item.href) {
+        <a
+          [routerLink]="item.href"
+          routerLinkActive="site-nav__link--active"
+          [routerLinkActiveOptions]="{ exact: item.exact }"
+          class="site-nav__link"
+        >
+          {{ item.label }}
+        </a>
+      }
+    </nav>
+
+    <a routerLink="/painel" class="site-cta">Novo imovel</a>
+  </header>
+
+  <main class="page-content">
+    <router-outlet />
+  </main>
+
+  <footer class="site-footer">
+    <span>Angular + TypeScript + SCSS</span>
+    <strong>API Spring Boot de cadastro imobiliario</strong>
+  </footer>
+</div>
