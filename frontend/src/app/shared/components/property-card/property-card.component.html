@@ -1,41 +1,89 @@
 @let data = imovel();
 
-<article class="property-card" [ngClass]="toneClass()">
-  <div class="property-card__visual">
-    <span class="property-card__badge">{{ finalidadeLabel() }}</span>
-    <span class="property-card__code">{{ categoriaCode() }}</span>
-    <div class="property-card__location">
-      <strong>{{ data.bairro }}</strong>
-      <span>{{ data.cidade }} / {{ data.estado }}</span>
+<article class="group overflow-hidden rounded-[2rem] border border-white/10 bg-white/95 text-stone-900 shadow-[0_30px_80px_rgba(15,23,42,0.18)] transition hover:-translate-y-1">
+  <div class="relative h-64 overflow-hidden">
+    <img
+      [ngSrc]="imageUrl()"
+      [alt]="data.titulo"
+      fill
+      class="object-cover transition duration-700 group-hover:scale-105"
+      sizes="(max-width: 768px) 100vw, 33vw"
+    />
+    <div class="absolute inset-0 bg-gradient-to-t from-stone-950/65 via-stone-950/10 to-transparent"></div>
+    <div class="absolute inset-x-0 top-0 flex items-center justify-between p-4">
+      <span class="rounded-full bg-emerald-300 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-stone-950">
+        {{ formatEnumLabel(data.finalidade) }}
+      </span>
+      @if (data.destaque) {
+        <span class="rounded-full border border-white/30 bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur">
+          Destaque
+        </span>
+      }
+    </div>
+    <div class="absolute inset-x-0 bottom-0 p-4 text-white">
+      <p class="text-sm text-white/80">{{ data.bairro }}, {{ data.cidade }}</p>
+      <h3 class="font-display text-2xl leading-tight">{{ data.titulo }}</h3>
     </div>
   </div>
 
-  <div class="property-card__content">
-    <div class="property-card__topline">
-      <span>{{ formatEnumLabel(data.categoria) }}</span>
-      @if (data.destaque) {
-        <small>Destaque</small>
-      }
+  <div class="space-y-5 p-5">
+    <div class="flex items-end justify-between gap-4">
+      <div>
+        <p class="text-xs uppercase tracking-[0.3em] text-stone-500">{{ formatEnumLabel(data.categoria) }}</p>
+        <strong class="mt-2 block text-3xl font-black text-stone-950">
+          {{ data.valor | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}
+        </strong>
+      </div>
+      <div class="rounded-2xl bg-stone-100 px-4 py-3 text-right">
+        <span class="block text-xs uppercase tracking-[0.2em] text-stone-500">Area</span>
+        <strong class="text-lg font-black text-stone-900">{{ data.areaM2 | number: '1.0-0' }} m2</strong>
+      </div>
     </div>
 
-    <h3>{{ data.titulo }}</h3>
-    <p>{{ data.descricao }}</p>
-
-    <div class="property-card__specs">
-      <span>{{ data.areaM2 | number: '1.0-0' }} m2</span>
-      <span>{{ data.quartos }} quartos</span>
-      <span>{{ data.banheiros }} banhos</span>
-      <span>{{ data.vagas }} vagas</span>
+    <div class="grid grid-cols-2 gap-3 text-sm text-stone-600 md:grid-cols-4">
+      <div class="rounded-2xl bg-stone-100 px-3 py-3">
+        <span class="block text-xs uppercase tracking-[0.2em] text-stone-500">Quartos</span>
+        <strong class="text-stone-900">{{ data.quartos }}</strong>
+      </div>
+      <div class="rounded-2xl bg-stone-100 px-3 py-3">
+        <span class="block text-xs uppercase tracking-[0.2em] text-stone-500">Banheiros</span>
+        <strong class="text-stone-900">{{ data.banheiros }}</strong>
+      </div>
+      <div class="rounded-2xl bg-stone-100 px-3 py-3">
+        <span class="block text-xs uppercase tracking-[0.2em] text-stone-500">Vagas</span>
+        <strong class="text-stone-900">{{ data.vagas }}</strong>
+      </div>
+      <div class="rounded-2xl bg-stone-100 px-3 py-3">
+        <span class="block text-xs uppercase tracking-[0.2em] text-stone-500">R$/m2</span>
+        <strong class="text-stone-900">
+          {{ valorMetroQuadrado() | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}
+        </strong>
+      </div>
     </div>
 
-    <div class="property-card__price">
-      <strong>{{ data.valor | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}</strong>
-      <span>{{ valorMetroQuadrado() | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}/m2</span>
+    <div class="flex items-center justify-between gap-3">
+      <div class="text-sm text-stone-500">
+        {{ data.endereco }}, {{ data.estado }}
+      </div>
+      <button
+        type="button"
+        class="rounded-full bg-stone-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-600"
+        (click)="toggleDetails()"
+      >
+        {{ expanded() ? 'Ocultar detalhes' : 'Ver detalhes' }}
+      </button>
     </div>
 
-    <div class="property-card__meta">
-      <span>Condominio {{ data.condominio | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}</span>
-      <span>IPTU {{ data.iptu | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}</span>
-    </div>
+    @if (expanded()) {
+      <div class="rounded-[1.5rem] border border-stone-200 bg-stone-50 p-4 text-sm text-stone-600">
+        <p class="mb-3 leading-6">{{ data.descricao }}</p>
+        <div class="grid gap-2 md:grid-cols-2">
+          <span>Condominio: {{ data.condominio | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}</span>
+          <span>IPTU: {{ data.iptu | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}</span>
+          <span>Codigo: {{ data.codigo }}</span>
+          <span>Corretor: {{ data.corretor?.nome ?? 'Equipe VistaPrime' }}</span>
+        </div>
+      </div>
+    }
   </div>
 </article>

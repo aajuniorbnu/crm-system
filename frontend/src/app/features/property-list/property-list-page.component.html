@@ -1,0 +1,153 @@
+<section class="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
+  <div class="space-y-6">
+    <div class="space-y-4">
+      <span class="inline-flex rounded-full border border-emerald-300/30 bg-emerald-300/10 px-4 py-2 text-xs font-black uppercase tracking-[0.35em] text-emerald-200">
+        Catalogo {{ tipoAtual() }}
+      </span>
+      <h2 class="font-display max-w-3xl text-4xl leading-tight text-white md:text-6xl">
+        {{ titulo() }}
+      </h2>
+      <p class="max-w-2xl text-lg leading-8 text-stone-300">
+        {{ subtitulo() }}
+      </p>
+    </div>
+
+    <div class="grid gap-4 rounded-[2rem] border border-white/10 bg-white/6 p-5 backdrop-blur md:grid-cols-2">
+      <article class="rounded-[1.6rem] bg-white/6 p-5">
+        <p class="text-xs uppercase tracking-[0.25em] text-stone-400">Estilo da colecao</p>
+        <h3 class="mt-3 text-2xl font-black text-white">Filtros objetivos para decisao rapida</h3>
+        <p class="mt-2 text-sm leading-6 text-stone-300">
+          Valor, area e cidade cruzados na API para devolver apenas o recorte que o cliente precisa ver.
+        </p>
+      </article>
+
+      <article class="rounded-[1.6rem] bg-amber-300 p-5 text-stone-950">
+        <p class="text-xs uppercase tracking-[0.25em]">Painel exclusivo</p>
+        <h3 class="mt-3 text-2xl font-black">Corretores gerenciam o proprio portfolio</h3>
+        <p class="mt-2 text-sm leading-6">
+          Entre no dashboard protegido para editar perfil, cadastrar imoveis e acompanhar o valor do portfolio.
+        </p>
+        <a routerLink="/painel" class="mt-4 inline-flex rounded-full bg-stone-950 px-4 py-2 text-sm font-bold text-white">
+          Abrir painel
+        </a>
+      </article>
+    </div>
+  </div>
+
+  <aside class="rounded-[2rem] border border-white/10 bg-stone-900/70 p-5 shadow-[0_30px_80px_rgba(0,0,0,0.22)] backdrop-blur">
+    <div class="mb-5 flex items-center justify-between gap-4">
+      <div>
+        <p class="text-xs uppercase tracking-[0.25em] text-stone-400">Filtros</p>
+        <h3 class="mt-2 text-2xl font-black text-white">Refine a busca</h3>
+      </div>
+      <button
+        type="button"
+        class="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-stone-200 transition hover:border-amber-300 hover:text-white"
+        (click)="limparFiltros()"
+      >
+        Limpar
+      </button>
+    </div>
+
+    <div class="grid gap-4">
+      <label class="space-y-2 text-sm text-stone-300">
+        <span>Cidade</span>
+        <input
+          type="text"
+          class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white outline-none ring-0 placeholder:text-stone-500"
+          [ngModel]="filtros().cidade"
+          (ngModelChange)="atualizarCampo('cidade', $event)"
+          placeholder="Ex.: Sao Paulo"
+        />
+      </label>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <label class="space-y-2 text-sm text-stone-300">
+          <span>Preco minimo</span>
+          <input
+            type="number"
+            class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white outline-none"
+            [ngModel]="filtros().precoMin"
+            (ngModelChange)="atualizarCampo('precoMin', $event)"
+            placeholder="0"
+          />
+        </label>
+        <label class="space-y-2 text-sm text-stone-300">
+          <span>Preco maximo</span>
+          <input
+            type="number"
+            class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white outline-none"
+            [ngModel]="filtros().precoMax"
+            (ngModelChange)="atualizarCampo('precoMax', $event)"
+            placeholder="5000000"
+          />
+        </label>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <label class="space-y-2 text-sm text-stone-300">
+          <span>Area minima</span>
+          <input
+            type="number"
+            class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white outline-none"
+            [ngModel]="filtros().areaMin"
+            (ngModelChange)="atualizarCampo('areaMin', $event)"
+            placeholder="50"
+          />
+        </label>
+        <label class="space-y-2 text-sm text-stone-300">
+          <span>Area maxima</span>
+          <input
+            type="number"
+            class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white outline-none"
+            [ngModel]="filtros().areaMax"
+            (ngModelChange)="atualizarCampo('areaMax', $event)"
+            placeholder="1000"
+          />
+        </label>
+      </div>
+
+      <button
+        type="button"
+        class="mt-2 rounded-full bg-emerald-300 px-5 py-3 text-sm font-black text-stone-950 transition hover:bg-emerald-200"
+        (click)="aplicarFiltros()"
+      >
+        Aplicar filtros
+      </button>
+    </div>
+  </aside>
+</section>
+
+@if (error()) {
+  <div class="mt-8 rounded-[1.6rem] border border-rose-400/30 bg-rose-400/10 px-5 py-4 text-rose-100">
+    {{ error() }}
+  </div>
+}
+
+<section class="mt-10">
+  <div class="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+    <div>
+      <p class="text-xs uppercase tracking-[0.25em] text-stone-400">Portfolio visivel</p>
+      <h3 class="mt-2 text-3xl font-black text-white">Imoveis encontrados</h3>
+    </div>
+    <div class="rounded-full border border-white/10 bg-white/6 px-4 py-2 text-sm text-stone-200">
+      {{ imoveis().length }} resultado(s)
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="rounded-[2rem] border border-white/10 bg-white/6 px-5 py-10 text-center text-stone-300">
+      Carregando imoveis...
+    </div>
+  } @else if (imoveis().length) {
+    <div class="grid gap-6 xl:grid-cols-3 md:grid-cols-2">
+      @for (imovel of imoveis(); track imovel.codigo) {
+        <app-property-card [imovel]="imovel" />
+      }
+    </div>
+  } @else {
+    <div class="rounded-[2rem] border border-dashed border-white/15 bg-white/4 px-5 py-10 text-center text-stone-300">
+      Nenhum imovel encontrado para os filtros informados.
+    </div>
+  }
+</section>

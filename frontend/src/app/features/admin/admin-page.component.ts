@@ -7,6 +7,7 @@ import { finalize } from 'rxjs';
 import {
   CATEGORIAS_IMOVEL,
   CategoriaImovel,
+  DashboardCorretorResponse,
   FINALIDADES_IMOVEL,
   FinalidadeImovel,
   formatEnumLabel,
@@ -14,17 +15,20 @@ import {
   STATUS_IMOVEL,
   StatusImovel
 } from '../../core/models/imovel.model';
+import { AuthService } from '../../core/services/auth.service';
+import { CorretorApiService } from '../../core/services/corretor-api.service';
 import { ImoveisApiService } from '../../core/services/imoveis-api.service';
 
 @Component({
   selector: 'app-admin-page',
   imports: [ReactiveFormsModule, RouterLink, CurrencyPipe],
-  templateUrl: './admin-page.component.html',
-  styleUrl: './admin-page.component.scss'
+  templateUrl: './admin-page.component.html'
 })
 export class AdminPageComponent {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly api = inject(ImoveisApiService);
+  private readonly corretorApi = inject(CorretorApiService);
+  private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly categorias = CATEGORIAS_IMOVEL;
@@ -35,42 +39,39 @@ export class AdminPageComponent {
   readonly error = signal('');
   readonly success = signal('');
   readonly editingId = signal<number | null>(null);
-  readonly imoveis = signal<Imovel[]>([]);
+  readonly dashboard = signal<DashboardCorretorResponse | null>(null);
 
   readonly form = this.fb.group({
-    codigo: ['IMO-001', [Validators.required, Validators.minLength(4)]],
-    titulo: ['Apartamento moderno com varanda', [Validators.required, Validators.minLength(5)]],
+    codigo: ['IMO-101', [Validators.required, Validators.minLength(4)]],
+    titulo: ['Apartamento premium com vista livre', [Validators.required, Validators.minLength(5)]],
     descricao: [
-      'Descricao comercial do imovel com destaques de localizacao, planta e estilo de vida.',
+      'Descricao comercial com beneficios de localizacao, distribuicao interna e potencial de negociacao.',
       [Validators.required, Validators.minLength(20)]
     ],
     categoria: this.fb.control<CategoriaImovel>('APARTAMENTO', Validators.required),
     finalidade: this.fb.control<FinalidadeImovel>('VENDA', Validators.required),
     status: this.fb.control<StatusImovel>('DISPONIVEL', Validators.required),
     cidade: ['Sao Paulo', Validators.required],
-    bairro: ['Moema', Validators.required],
-    endereco: ['Avenida Jurucce, 1200', Validators.required],
+    bairro: ['Vila Mariana', Validators.required],
+    endereco: ['Rua Modelo, 100', Validators.required],
     estado: ['SP', [Validators.required, Validators.maxLength(2)]],
-    cep: ['04512-000', Validators.required],
-    areaM2: [82, [Validators.required, Validators.min(10)]],
-    quartos: [2, [Validators.required, Validators.min(0)]],
+    cep: ['04015-000', Validators.required],
+    areaM2: [95, [Validators.required, Validators.min(10)]],
+    quartos: [3, [Validators.required, Validators.min(0)]],
     banheiros: [2, [Validators.required, Validators.min(0)]],
-    vagas: [1, [Validators.required, Validators.min(0)]],
-    valor: [980000, [Validators.required, Validators.min(1000)]],
-    condominio: [890, [Validators.required, Validators.min(0)]],
-    iptu: [240, [Validators.required, Validators.min(0)]],
+    vagas: [2, [Validators.required, Validators.min(0)]],
+    valor: [1250000, [Validators.required, Validators.min(1000)]],
+    condominio: [980, [Validators.required, Validators.min(0)]],
+    iptu: [260, [Validators.required, Validators.min(0)]],
     destaque: [true],
     imagemUrl: ['']
   });
 
-  readonly resumo = computed(() => ({
-    venda: this.imoveis().filter((item) => item.finalidade === 'VENDA').length,
-    aluguel: this.imoveis().filter((item) => item.finalidade === 'ALUGUEL').length,
-    destaque: this.imoveis().filter((item) => item.destaque).length
-  }));
+  readonly imoveis = computed(() => this.dashboard()?.imoveis ?? []);
+  readonly corretor = computed(() => this.dashboard()?.corretor ?? this.authService.corretor());
 
   constructor() {
-    this.carregarImoveis();
+    this.carregarDashboard();
   }
 
   salvar(): void {
@@ -86,9 +87,7 @@ export class AdminPageComponent {
     this.success.set('');
 
     const payload = this.buildPayload();
-    const request = this.editingId()
-      ? this.api.atualizar(this.editingId()!, payload)
-      : this.api.criar(payload);
+    const request = this.editingId() ? this.api.atualizar(this.editingId()!, payload) : this.api.criar(payload);
 
     request
       .pipe(
@@ -97,17 +96,13 @@ export class AdminPageComponent {
       )
       .subscribe({
         next: () => {
-          this.success.set(
-            this.editingId() ? 'Imovel atualizado com sucesso.' : 'Imovel cadastrado com sucesso.'
-          );
+          this.success.set(this.editingId() ? 'Imovel atualizado com sucesso.' : 'Imovel cadastrado com sucesso.');
           this.error.set('');
           this.novoRegistro();
-          this.carregarImoveis();
+          this.carregarDashboard();
         },
         error: () => {
-          this.error.set(
-            'Nao foi possivel salvar. Confirme se o backend Spring esta rodando em localhost:8080.'
-          );
+          this.error.set('Nao foi possivel salvar o imovel do corretor.');
           this.success.set('');
         }
       });
@@ -142,12 +137,7 @@ export class AdminPageComponent {
   }
 
   remover(item: Imovel): void {
-    if (!item.id) {
-      return;
-    }
-
-    const confirmed = window.confirm(`Deseja remover o imovel ${item.codigo}?`);
-    if (!confirmed) {
+    if (!item.id || !window.confirm(`Deseja remover o imovel ${item.codigo}?`)) {
       return;
     }
 
@@ -161,7 +151,7 @@ export class AdminPageComponent {
           if (this.editingId() === item.id) {
             this.novoRegistro();
           }
-          this.carregarImoveis();
+          this.carregarDashboard();
         },
         error: () => {
           this.error.set('Nao foi possivel remover o imovel selecionado.');
@@ -173,32 +163,28 @@ export class AdminPageComponent {
   novoRegistro(): void {
     this.editingId.set(null);
     this.form.reset({
-      codigo: 'IMO-001',
-      titulo: 'Apartamento moderno com varanda',
+      codigo: 'IMO-101',
+      titulo: 'Apartamento premium com vista livre',
       descricao:
-        'Descricao comercial do imovel com destaques de localizacao, planta e estilo de vida.',
+        'Descricao comercial com beneficios de localizacao, distribuicao interna e potencial de negociacao.',
       categoria: 'APARTAMENTO',
       finalidade: 'VENDA',
       status: 'DISPONIVEL',
       cidade: 'Sao Paulo',
-      bairro: 'Moema',
-      endereco: 'Avenida Jurucce, 1200',
+      bairro: 'Vila Mariana',
+      endereco: 'Rua Modelo, 100',
       estado: 'SP',
-      cep: '04512-000',
-      areaM2: 82,
-      quartos: 2,
+      cep: '04015-000',
+      areaM2: 95,
+      quartos: 3,
       banheiros: 2,
-      vagas: 1,
-      valor: 980000,
-      condominio: 890,
-      iptu: 240,
+      vagas: 2,
+      valor: 1250000,
+      condominio: 980,
+      iptu: 260,
       destaque: true,
       imagemUrl: ''
     });
-  }
-
-  trackByCodigo(_: number, item: Imovel): string {
-    return item.codigo;
   }
 
   controlHasError(controlName: keyof typeof this.form.controls): boolean {
@@ -208,23 +194,24 @@ export class AdminPageComponent {
 
   protected readonly formatEnumLabel = formatEnumLabel;
 
-  private carregarImoveis(): void {
+  private carregarDashboard(): void {
     this.loading.set(true);
     this.error.set('');
 
-    this.api
-      .listar()
+    this.corretorApi
+      .dashboard()
       .pipe(
         finalize(() => this.loading.set(false)),
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
-        next: (items) => this.imoveis.set(items),
+        next: (dashboard) => {
+          this.dashboard.set(dashboard);
+          this.authService.updateCorretor(dashboard.corretor);
+        },
         error: () => {
-          this.imoveis.set([]);
-          this.error.set(
-            'Nao foi possivel carregar a lista. Verifique a API Spring antes de usar o painel.'
-          );
+          this.dashboard.set(null);
+          this.error.set('Nao foi possivel carregar o dashboard protegido do corretor.');
         }
       });
   }

@@ -1,0 +1,48 @@
+<section class="mx-auto grid max-w-5xl gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+  <article class="rounded-[2rem] border border-white/10 bg-gradient-to-br from-emerald-300 to-amber-300 p-8 text-stone-950">
+    <p class="text-xs uppercase tracking-[0.35em]"></p>
+    <h2 class="mt-4 font-display text-4xl">Login de corretores para dashboard e portfolio </h2>
+    <p class="mt-4 text-base leading-7">
+     
+    <div class="mt-8 rounded-[1.6rem] bg-stone-950/10 p-5">
+      <p class="text-sm font-semibold"></p>
+      <p class="mt-3 text-sm"></p>
+      <p class="text-sm">/p>
+    </div>
+  </article>
+
+  <article class="rounded-[2rem] border border-white/10 bg-white/95 p-8 text-stone-900 shadow-[0_30px_80px_rgba(15,23,42,0.18)]">
+    <p class="text-xs uppercase tracking-[0.35em] text-stone-500">Area restrita</p>
+    <h3 class="mt-4 text-3xl font-black">Entrar como corretor</h3>
+
+    @if (error()) {
+      <div class="mt-6 rounded-2xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+        {{ error() }}
+      </div>
+    }
+
+    <form class="mt-8 space-y-5" [formGroup]="form" (ngSubmit)="entrar()">
+      <label class="block space-y-2 text-sm">
+        <span class="font-semibold text-stone-700">Email</span>
+        <input class="w-full rounded-2xl border border-stone-200 px-4 py-3 outline-none transition focus:border-emerald-500" formControlName="email" />
+      </label>
+
+      <label class="block space-y-2 text-sm">
+        <span class="font-semibold text-stone-700">Senha</span>
+        <input type="password" class="w-full rounded-2xl border border-stone-200 px-4 py-3 outline-none transition focus:border-emerald-500" formControlName="senha" />
+      </label>
+
+      <button
+        type="submit"
+        class="w-full rounded-full bg-stone-950 px-5 py-3 text-sm font-black text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-stone-500"
+        [disabled]="loading()"
+      >
+        {{ loading() ? 'Entrando...' : 'Acessar dashboard' }}
+      </button>
+    </form>
+
+    <a routerLink="/imoveis/apartamento" class="mt-6 inline-flex text-sm font-semibold text-stone-600 hover:text-stone-950">
+      Voltar para o catalogo 
+    </a>
+  </article>
+</section>

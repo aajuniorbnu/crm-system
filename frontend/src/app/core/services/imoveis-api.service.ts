@@ -1,10 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import {
-  Imovel,
-  ImovelFilters,
-  IndicadoresImoveis
-} from '../models/imovel.model';
+import { Imovel, ImovelFilters, IndicadoresImoveis } from '../models/imovel.model';
 
 @Injectable({ providedIn: 'root' })
 export class ImoveisApiService {
@@ -21,6 +17,14 @@ export class ImoveisApiService {
     });
 
     return this.http.get<Imovel[]>(this.baseUrl, { params });
+  }
+
+  listarMeus() {
+    return this.http.get<Imovel[]>(`${this.baseUrl}/meus`);
+  }
+
+  buscarPorId(id: number) {
+    return this.http.get<Imovel>(`${this.baseUrl}/${id}`);
   }
 
   indicadores() {

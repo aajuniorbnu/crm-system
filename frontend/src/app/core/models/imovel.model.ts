@@ -15,6 +15,19 @@ export type StatusImovel =
   | 'ALUGADO'
   | 'INATIVO';
 
+export type ImovelTipoRoute = 'rural' | 'casa' | 'apartamento' | 'comercial';
+
+export interface CorretorResumo {
+  id: number;
+  nome: string;
+  email: string;
+  telefone: string;
+  creci: string;
+  fotoUrl: string | null;
+  ativo: boolean;
+  dataCadastro: string;
+}
+
 export interface Imovel {
   id?: number;
   codigo: string;
@@ -38,14 +51,20 @@ export interface Imovel {
   destaque: boolean;
   imagemUrl?: string | null;
   dataCadastro?: string;
+  corretor?: CorretorResumo | null;
 }
 
 export interface ImovelFilters {
+  tipo?: ImovelTipoRoute;
   finalidade?: FinalidadeImovel;
   categoria?: CategoriaImovel;
   status?: StatusImovel;
   cidade?: string;
   destaque?: boolean;
+  precoMin?: number | null;
+  precoMax?: number | null;
+  areaMin?: number | null;
+  areaMax?: number | null;
 }
 
 export interface IndicadoresImoveis {
@@ -54,6 +73,14 @@ export interface IndicadoresImoveis {
   imoveisAluguelDisponiveis: number;
   mediaVendaMetroQuadrado: number;
   mediaAluguelMetroQuadrado: number;
+}
+
+export interface DashboardCorretorResponse {
+  corretor: CorretorResumo;
+  imoveis: Imovel[];
+  totalImoveis: number;
+  destaques: number;
+  valorPortfolio: number;
 }
 
 export const CATEGORIAS_IMOVEL: CategoriaImovel[] = [
@@ -75,14 +102,6 @@ export const STATUS_IMOVEL: StatusImovel[] = [
   'INATIVO'
 ];
 
-export const EMPTY_INDICADORES: IndicadoresImoveis = {
-  totalImoveis: 0,
-  imoveisVendaDisponiveis: 0,
-  imoveisAluguelDisponiveis: 0,
-  mediaVendaMetroQuadrado: 0,
-  mediaAluguelMetroQuadrado: 0
-};
-
 export function formatEnumLabel(value: string): string {
   return value
     .toLowerCase()
@@ -97,4 +116,15 @@ export function calculateValuePerSquareMeter(areaM2: number, valor: number): num
   }
 
   return valor / areaM2;
+}
+
+export function mapTipoToCategoria(tipo: ImovelTipoRoute): CategoriaImovel {
+  const map: Record<ImovelTipoRoute, CategoriaImovel> = {
+    apartamento: 'APARTAMENTO',
+    casa: 'CASA',
+    comercial: 'COMERCIAL',
+    rural: 'RURAL'
+  };
+
+  return map[tipo];
 }

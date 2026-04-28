@@ -1,203 +1,246 @@
-<section class="admin-hero">
-  <div>
-    <span class="eyebrow">Painel administrativo</span>
-    <h1>Cadastre imoveis para venda e locacao na mesma API.</h1>
-    <p>
-      Aqui voce controla o portfolio, marca destaques e atualiza valores sem sair do frontend Angular.
-    </p>
+<section class="space-y-8">
+  <div class="grid gap-6 rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur xl:grid-cols-[1.25fr_0.75fr]">
+    <div>
+      <p class="text-xs uppercase tracking-[0.35em] text-emerald-200">Dashboard protegido</p>
+      <h2 class="mt-3 font-display text-4xl text-white">Painel do corretor com portfolio e cadastro de imoveis</h2>
+      <p class="mt-3 max-w-2xl text-base leading-7 text-stone-300">
+        JWT ativo no navegador, rotas protegidas por guard e CRUD limitado aos imoveis do corretor autenticado.
+      </p>
+    </div>
+
+    <div class="rounded-[1.75rem] border border-white/10 bg-stone-950/50 p-5">
+      <p class="text-xs uppercase tracking-[0.25em] text-stone-400">Corretor autenticado</p>
+      <h3 class="mt-3 text-2xl font-black text-white">{{ corretor()?.nome }}</h3>
+      <p class="mt-2 text-sm text-stone-300">{{ corretor()?.email }}</p>
+      <p class="mt-1 text-sm text-stone-300">{{ corretor()?.creci }}</p>
+      <a routerLink="/painel/perfil" class="mt-5 inline-flex rounded-full bg-amber-300 px-4 py-2 text-sm font-bold text-stone-950">
+        Editar perfil
+      </a>
+    </div>
   </div>
 
-  <a routerLink="/" class="admin-link">Voltar ao catalogo</a>
-</section>
-
-<section class="summary-grid">
-  <article class="summary-card">
-    <span>Em venda</span>
-    <strong>{{ resumo().venda }}</strong>
-  </article>
-  <article class="summary-card">
-    <span>Em aluguel</span>
-    <strong>{{ resumo().aluguel }}</strong>
-  </article>
-  <article class="summary-card">
-    <span>Destaques</span>
-    <strong>{{ resumo().destaque }}</strong>
-  </article>
-</section>
-
-@if (error()) {
-  <div class="feedback feedback--error">{{ error() }}</div>
-}
-
-@if (success()) {
-  <div class="feedback feedback--success">{{ success() }}</div>
-}
-
-<section class="admin-grid">
-  <article class="panel-card">
-    <div class="panel-head">
-      <div>
-        <span class="eyebrow">Formulario</span>
-        <h2>{{ editingId() ? 'Editar imovel' : 'Novo imovel' }}</h2>
-      </div>
-      <button type="button" class="ghost-button" (click)="novoRegistro()">Limpar</button>
+  @if (error()) {
+    <div class="rounded-[1.6rem] border border-rose-400/30 bg-rose-400/10 px-5 py-4 text-rose-100">
+      {{ error() }}
     </div>
+  }
 
-    <form class="admin-form" [formGroup]="form" (ngSubmit)="salvar()">
-      <label>
-        <span>Codigo</span>
-        <input type="text" formControlName="codigo" />
-        @if (controlHasError('codigo')) {
-          <small>Informe um codigo unico.</small>
-        }
-      </label>
+  @if (success()) {
+    <div class="rounded-[1.6rem] border border-emerald-300/30 bg-emerald-300/10 px-5 py-4 text-emerald-100">
+      {{ success() }}
+    </div>
+  }
 
-      <label class="admin-form__wide">
-        <span>Titulo comercial</span>
-        <input type="text" formControlName="titulo" />
-      </label>
+  <section class="grid gap-4 md:grid-cols-3">
+    <article class="rounded-[1.8rem] border border-white/10 bg-white/6 p-5">
+      <p class="text-xs uppercase tracking-[0.25em] text-stone-400">Imoveis</p>
+      <strong class="mt-3 block text-4xl font-black text-white">{{ dashboard()?.totalImoveis ?? 0 }}</strong>
+    </article>
+    <article class="rounded-[1.8rem] border border-white/10 bg-white/6 p-5">
+      <p class="text-xs uppercase tracking-[0.25em] text-stone-400">Destaques</p>
+      <strong class="mt-3 block text-4xl font-black text-white">{{ dashboard()?.destaques ?? 0 }}</strong>
+    </article>
+    <article class="rounded-[1.8rem] border border-white/10 bg-white/6 p-5">
+      <p class="text-xs uppercase tracking-[0.25em] text-stone-400">Valor do portfolio</p>
+      <strong class="mt-3 block text-4xl font-black text-white">
+        {{ dashboard()?.valorPortfolio ?? 0 | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}
+      </strong>
+    </article>
+  </section>
 
-      <label class="admin-form__wide">
-        <span>Descricao</span>
-        <textarea rows="4" formControlName="descricao"></textarea>
-      </label>
-
-      <label>
-        <span>Categoria</span>
-        <select formControlName="categoria">
-          @for (item of categorias; track item) {
-            <option [value]="item">{{ formatEnumLabel(item) }}</option>
-          }
-        </select>
-      </label>
-
-      <label>
-        <span>Finalidade</span>
-        <select formControlName="finalidade">
-          @for (item of finalidades; track item) {
-            <option [value]="item">{{ formatEnumLabel(item) }}</option>
-          }
-        </select>
-      </label>
-
-      <label>
-        <span>Status</span>
-        <select formControlName="status">
-          @for (item of statusOptions; track item) {
-            <option [value]="item">{{ formatEnumLabel(item) }}</option>
-          }
-        </select>
-      </label>
-
-      <label>
-        <span>Cidade</span>
-        <input type="text" formControlName="cidade" />
-      </label>
-
-      <label>
-        <span>Bairro</span>
-        <input type="text" formControlName="bairro" />
-      </label>
-
-      <label class="admin-form__wide">
-        <span>Endereco</span>
-        <input type="text" formControlName="endereco" />
-      </label>
-
-      <label>
-        <span>Estado</span>
-        <input type="text" maxlength="2" formControlName="estado" />
-      </label>
-
-      <label>
-        <span>CEP</span>
-        <input type="text" formControlName="cep" />
-      </label>
-
-      <label>
-        <span>Area m2</span>
-        <input type="number" min="0" formControlName="areaM2" />
-      </label>
-
-      <label>
-        <span>Quartos</span>
-        <input type="number" min="0" formControlName="quartos" />
-      </label>
-
-      <label>
-        <span>Banheiros</span>
-        <input type="number" min="0" formControlName="banheiros" />
-      </label>
-
-      <label>
-        <span>Vagas</span>
-        <input type="number" min="0" formControlName="vagas" />
-      </label>
-
-      <label>
-        <span>Valor</span>
-        <input type="number" min="0" formControlName="valor" />
-      </label>
-
-      <label>
-        <span>Condominio</span>
-        <input type="number" min="0" formControlName="condominio" />
-      </label>
-
-      <label>
-        <span>IPTU</span>
-        <input type="number" min="0" formControlName="iptu" />
-      </label>
-
-      <label class="admin-form__wide">
-        <span>Imagem URL opcional</span>
-        <input type="text" formControlName="imagemUrl" />
-      </label>
-
-      <label class="toggle admin-form__wide">
-        <input type="checkbox" formControlName="destaque" />
-        <span>Marcar como destaque</span>
-      </label>
-
-      <div class="admin-form__actions admin-form__wide">
-        <button type="submit" class="primary-button" [disabled]="saving()">
-          {{ saving() ? 'Salvando...' : editingId() ? 'Atualizar imovel' : 'Cadastrar imovel' }}
+  <section class="grid gap-8 xl:grid-cols-[0.95fr_1.05fr]">
+    <article class="rounded-[2rem] border border-white/10 bg-stone-950/60 p-6">
+      <div class="mb-6 flex items-center justify-between gap-4">
+        <div>
+          <p class="text-xs uppercase tracking-[0.25em] text-stone-400">Cadastro</p>
+          <h3 class="mt-2 text-2xl font-black text-white">
+            {{ editingId() ? 'Atualizar imovel do corretor' : 'Novo imovel no portfolio' }}
+          </h3>
+        </div>
+        <button
+          type="button"
+          class="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-stone-200 transition hover:border-amber-300 hover:text-white"
+          (click)="novoRegistro()"
+        >
+          Limpar
         </button>
       </div>
-    </form>
-  </article>
 
-  <article class="panel-card">
-    <div class="panel-head">
-      <div>
-        <span class="eyebrow">Portfolio</span>
-        <h2>Imoveis cadastrados</h2>
+      <form class="grid gap-4 md:grid-cols-2" [formGroup]="form" (ngSubmit)="salvar()">
+        <label class="space-y-2 text-sm text-stone-300">
+          <span>Codigo</span>
+          <input class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white" formControlName="codigo" />
+          @if (controlHasError('codigo')) {
+            <small class="text-rose-300">Informe um codigo valido.</small>
+          }
+        </label>
+
+        <label class="space-y-2 text-sm text-stone-300 md:col-span-2">
+          <span>Titulo</span>
+          <input class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white" formControlName="titulo" />
+        </label>
+
+        <label class="space-y-2 text-sm text-stone-300 md:col-span-2">
+          <span>Descricao</span>
+          <textarea rows="4" class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white" formControlName="descricao"></textarea>
+        </label>
+
+        <label class="space-y-2 text-sm text-stone-300">
+          <span>Categoria</span>
+          <select class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white" formControlName="categoria">
+            @for (item of categorias; track item) {
+              <option [value]="item">{{ formatEnumLabel(item) }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="space-y-2 text-sm text-stone-300">
+          <span>Finalidade</span>
+          <select class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white" formControlName="finalidade">
+            @for (item of finalidades; track item) {
+              <option [value]="item">{{ formatEnumLabel(item) }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="space-y-2 text-sm text-stone-300">
+          <span>Status</span>
+          <select class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white" formControlName="status">
+            @for (item of statusOptions; track item) {
+              <option [value]="item">{{ formatEnumLabel(item) }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="space-y-2 text-sm text-stone-300">
+          <span>Cidade</span>
+          <input class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white" formControlName="cidade" />
+        </label>
+
+        <label class="space-y-2 text-sm text-stone-300">
+          <span>Bairro</span>
+          <input class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white" formControlName="bairro" />
+        </label>
+
+        <label class="space-y-2 text-sm text-stone-300 md:col-span-2">
+          <span>Endereco</span>
+          <input class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white" formControlName="endereco" />
+        </label>
+
+        <label class="space-y-2 text-sm text-stone-300">
+          <span>Estado</span>
+          <input maxlength="2" class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white" formControlName="estado" />
+        </label>
+
+        <label class="space-y-2 text-sm text-stone-300">
+          <span>CEP</span>
+          <input class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white" formControlName="cep" />
+        </label>
+
+        <label class="space-y-2 text-sm text-stone-300">
+          <span>Area m2</span>
+          <input type="number" class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white" formControlName="areaM2" />
+        </label>
+
+        <label class="space-y-2 text-sm text-stone-300">
+          <span>Quartos</span>
+          <input type="number" class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white" formControlName="quartos" />
+        </label>
+
+        <label class="space-y-2 text-sm text-stone-300">
+          <span>Banheiros</span>
+          <input type="number" class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white" formControlName="banheiros" />
+        </label>
+
+        <label class="space-y-2 text-sm text-stone-300">
+          <span>Vagas</span>
+          <input type="number" class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white" formControlName="vagas" />
+        </label>
+
+        <label class="space-y-2 text-sm text-stone-300">
+          <span>Valor</span>
+          <input type="number" class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white" formControlName="valor" />
+        </label>
+
+        <label class="space-y-2 text-sm text-stone-300">
+          <span>Condominio</span>
+          <input type="number" class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white" formControlName="condominio" />
+        </label>
+
+        <label class="space-y-2 text-sm text-stone-300">
+          <span>IPTU</span>
+          <input type="number" class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white" formControlName="iptu" />
+        </label>
+
+        <label class="space-y-2 text-sm text-stone-300 md:col-span-2">
+          <span>Imagem URL</span>
+          <input class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-white" formControlName="imagemUrl" />
+        </label>
+
+        <label class="md:col-span-2 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-stone-200">
+          <input type="checkbox" class="h-5 w-5 rounded border-white/20 bg-white/10" formControlName="destaque" />
+          <span>Marcar este imovel como destaque</span>
+        </label>
+
+        <div class="md:col-span-2">
+          <button
+            type="submit"
+            class="w-full rounded-full bg-emerald-300 px-5 py-3 text-sm font-black text-stone-950 transition hover:bg-emerald-200 disabled:cursor-not-allowed disabled:bg-stone-500"
+            [disabled]="saving()"
+          >
+            {{ saving() ? 'Salvando...' : editingId() ? 'Atualizar imovel' : 'Cadastrar imovel' }}
+          </button>
+        </div>
+      </form>
+    </article>
+
+    <article class="rounded-[2rem] border border-white/10 bg-white/6 p-6">
+      <div class="mb-6 flex items-center justify-between gap-4">
+        <div>
+          <p class="text-xs uppercase tracking-[0.25em] text-stone-400">Portfolio do corretor</p>
+          <h3 class="mt-2 text-2xl font-black text-white">Imoveis publicados</h3>
+        </div>
+        <span class="rounded-full border border-white/10 px-4 py-2 text-sm text-stone-200">
+          {{ imoveis().length }} item(ns)
+        </span>
       </div>
-      <span class="count-pill">{{ imoveis().length }} itens</span>
-    </div>
 
-    @if (loading()) {
-      <div class="feedback">Carregando lista...</div>
-    } @else if (imoveis().length) {
-      <div class="admin-list">
-        @for (item of imoveis(); track trackByCodigo($index, item)) {
-          <article class="list-card">
-            <div class="list-card__copy">
-              <span>{{ formatEnumLabel(item.categoria) }} - {{ formatEnumLabel(item.finalidade) }}</span>
-              <h3>{{ item.titulo }}</h3>
-              <p>{{ item.bairro }}, {{ item.cidade }} / {{ item.estado }}</p>
-              <strong>{{ item.valor | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}</strong>
-            </div>
-
-            <div class="list-card__actions">
-              <button type="button" class="ghost-button" (click)="editar(item)">Editar</button>
-              <button type="button" class="danger-button" (click)="remover(item)">Excluir</button>
-            </div>
-          </article>
-        }
-      </div>
-    } @else {
-      <div class="feedback">Nenhum imovel cadastrado ainda na API.</div>
-    }
-  </article>
+      @if (loading()) {
+        <div class="rounded-[1.6rem] border border-white/10 bg-white/5 px-4 py-8 text-center text-stone-300">
+          Carregando dashboard...
+        </div>
+      } @else if (imoveis().length) {
+        <div class="space-y-4">
+          @for (item of imoveis(); track item.codigo) {
+            <article class="rounded-[1.7rem] border border-white/10 bg-stone-950/55 p-5">
+              <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <p class="text-xs uppercase tracking-[0.22em] text-stone-400">
+                    {{ formatEnumLabel(item.categoria) }} • {{ formatEnumLabel(item.finalidade) }}
+                  </p>
+                  <h4 class="mt-2 text-xl font-black text-white">{{ item.titulo }}</h4>
+                  <p class="mt-2 text-sm text-stone-300">{{ item.bairro }}, {{ item.cidade }} / {{ item.estado }}</p>
+                  <strong class="mt-3 block text-2xl font-black text-amber-200">
+                    {{ item.valor | currency: 'BRL' : 'symbol' : '1.0-0' : 'pt-BR' }}
+                  </strong>
+                </div>
+                <div class="flex gap-2">
+                  <button type="button" class="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-stone-200 transition hover:border-emerald-300" (click)="editar(item)">
+                    Editar
+                  </button>
+                  <button type="button" class="rounded-full border border-rose-400/30 bg-rose-400/10 px-4 py-2 text-sm font-semibold text-rose-100 transition hover:border-rose-300" (click)="remover(item)">
+                    Excluir
+                  </button>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <div class="rounded-[1.6rem] border border-dashed border-white/15 bg-white/4 px-4 py-8 text-center text-stone-300">
+          Este corretor ainda nao publicou imoveis.
+        </div>
+      }
+    </article>
+  </section>
 </section>

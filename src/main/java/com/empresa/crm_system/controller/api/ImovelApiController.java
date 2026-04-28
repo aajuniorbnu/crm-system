@@ -1,12 +1,14 @@
 package com.empresa.crm_system.controller.api;
 
 import com.empresa.crm_system.Imovel;
+import com.empresa.crm_system.security.CorretorDetails;
 import com.empresa.crm_system.enums.CategoriaImovel;
 import com.empresa.crm_system.enums.FinalidadeImovel;
 import com.empresa.crm_system.enums.StatusImovel;
 import com.empresa.crm_system.service.ImovelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,12 +34,32 @@ public class ImovelApiController {
 
     @GetMapping
     public List<Imovel> listar(
+            @RequestParam(required = false) String tipo,
             @RequestParam(required = false) FinalidadeImovel finalidade,
             @RequestParam(required = false) CategoriaImovel categoria,
             @RequestParam(required = false) StatusImovel status,
             @RequestParam(required = false) String cidade,
-            @RequestParam(required = false) Boolean destaque) {
-        return imovelService.filtrar(finalidade, categoria, status, cidade, destaque);
+            @RequestParam(required = false) Boolean destaque,
+            @RequestParam(required = false) Double precoMin,
+            @RequestParam(required = false) Double precoMax,
+            @RequestParam(required = false) Double areaMin,
+            @RequestParam(required = false) Double areaMax) {
+        return imovelService.filtrar(
+                tipo,
+                finalidade,
+                categoria,
+                status,
+                cidade,
+                destaque,
+                precoMin,
+                precoMax,
+                areaMin,
+                areaMax);
+    }
+
+    @GetMapping("/meus")
+    public List<Imovel> listarMeus(@AuthenticationPrincipal CorretorDetails principal) {
+        return imovelService.listarPorCorretor(principal.getCorretor().getId());
     }
 
     @GetMapping("/indicadores")
@@ -59,23 +81,35 @@ public class ImovelApiController {
     }
 
     @PostMapping
-    public Imovel criar(@RequestBody Imovel imovel) {
-        return imovelService.salvar(imovel);
+    public Imovel criar(@RequestBody Imovel imovel, @AuthenticationPrincipal CorretorDetails principal) {
+        return imovelService.salvarParaCorretor(imovel, principal.getCorretor());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Imovel> atualizar(@PathVariable Long id, @RequestBody Imovel imovel) {
+    public ResponseEntity<Imovel> atualizar(
+            @PathVariable Long id,
+            @RequestBody Imovel imovel,
+            @AuthenticationPrincipal CorretorDetails principal) {
         return imovelService.buscarPorId(id)
+                .filter(imovelExistente -> imovelExistente.getCorretor() != null
+                        && imovelExistente.getCorretor().getId().equals(principal.getCorretor().getId()))
                 .map(imovelExistente -> {
                     imovel.setId(id);
+                    imovel.setCorretor(principal.getCorretor());
                     return ResponseEntity.ok(imovelService.salvar(imovel));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        imovelService.deletar(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> deletar(@PathVariable Long id, @AuthenticationPrincipal CorretorDetails principal) {
+        return imovelService.buscarPorId(id)
+                .filter(imovel -> imovel.getCorretor() != null
+                        && imovel.getCorretor().getId().equals(principal.getCorretor().getId()))
+                .map(imovel -> {
+                    imovelService.deletar(id);
+                    return ResponseEntity.ok().<Void>build();
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 }

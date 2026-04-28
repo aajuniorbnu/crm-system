@@ -15,5 +15,6 @@ public interface ImovelRepository extends JpaRepository<Imovel, Long> {
     List<Imovel> findByCategoria(CategoriaImovel categoria);
     List<Imovel> findByStatus(StatusImovel status);
     List<Imovel> findByDestaqueTrue();
+    List<Imovel> findByCorretorIdOrderByDataCadastroDesc(Long corretorId);
     boolean existsByCodigo(String codigo);
 }

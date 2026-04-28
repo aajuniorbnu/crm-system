@@ -283,8 +283,7 @@ a {
 }
 
 .toolbar-grid-products,
-.toolbar-grid-sales,
-.toolbar-grid-tickets {
+.toolbar-grid-sales {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
@@ -467,7 +466,6 @@ a {
   .toolbar-grid,
   .toolbar-grid-products,
   .toolbar-grid-sales,
-  .toolbar-grid-tickets,
   .toolbar-grid-reports,
   .mini-stats,
   .status-grid {

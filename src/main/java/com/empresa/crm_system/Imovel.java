@@ -11,6 +11,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
@@ -56,6 +58,11 @@ public class Imovel {
     private Boolean destaque;
     private String imagemUrl;
     private LocalDateTime dataCadastro;
+
+    @ManyToOne
+    @JoinColumn(name = "corretor_id")
+    @JsonIgnoreProperties({"imoveis", "senha"})
+    private Corretor corretor;
 
     public Long getId() {
         return id;
@@ -231,5 +238,13 @@ public class Imovel {
 
     public void setDataCadastro(LocalDateTime dataCadastro) {
         this.dataCadastro = dataCadastro;
+    }
+
+    public Corretor getCorretor() {
+        return corretor;
+    }
+
+    public void setCorretor(Corretor corretor) {
+        this.corretor = corretor;
     }
 }

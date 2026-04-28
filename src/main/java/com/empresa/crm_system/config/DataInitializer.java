@@ -1,6 +1,7 @@
 package com.empresa.crm_system.config;
 
 import com.empresa.crm_system.Cliente;
+import com.empresa.crm_system.Corretor;
 import com.empresa.crm_system.Imovel;
 import com.empresa.crm_system.Produto;
 import com.empresa.crm_system.enums.CategoriaImovel;
@@ -10,11 +11,13 @@ import com.empresa.crm_system.enums.StatusImovel;
 import com.empresa.crm_system.enums.StatusProduto;
 import com.empresa.crm_system.enums.TipoCliente;
 import com.empresa.crm_system.repository.ClienteRepository;
+import com.empresa.crm_system.repository.CorretorRepository;
 import com.empresa.crm_system.repository.ImovelRepository;
 import com.empresa.crm_system.repository.ProdutoRepository;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,12 +26,17 @@ import java.util.List;
 public class DataInitializer {
 
     @Bean
-    ApplicationRunner seedData(ProdutoRepository produtoRepository, ClienteRepository clienteRepository,
-                               ImovelRepository imovelRepository) {
+    ApplicationRunner seedData(
+            ProdutoRepository produtoRepository,
+            ClienteRepository clienteRepository,
+            ImovelRepository imovelRepository,
+            CorretorRepository corretorRepository,
+            PasswordEncoder passwordEncoder) {
         return args -> {
             seedProdutos(produtoRepository);
             seedClientes(clienteRepository);
-            seedImoveis(imovelRepository);
+            seedCorretores(corretorRepository, passwordEncoder);
+            seedImoveis(imovelRepository, corretorRepository);
         };
     }
 
@@ -104,38 +112,78 @@ public class DataInitializer {
         }
     }
 
-    private void seedImoveis(ImovelRepository imovelRepository) {
+    private void seedCorretores(CorretorRepository corretorRepository, PasswordEncoder passwordEncoder) {
+        List<Corretor> corretores = List.of(
+                corretor("Paula Nogueira", "paula@vistaprime.com", "(11) 98765-0001", "CRECI 123456-SP",
+                        "/uploads/demo-paula.jpg", passwordEncoder.encode("paula123")),
+                corretor("Rafael Mendes", "rafael@vistaprime.com", "(21) 99876-0002", "CRECI 654321-RJ",
+                        "/uploads/demo-rafael.jpg", passwordEncoder.encode("rafael123"))
+        );
+
+        List<Corretor> novosCorretores = corretores.stream()
+                .filter(corretor -> !corretorRepository.existsByEmailIgnoreCase(corretor.getEmail()))
+                .toList();
+
+        if (!novosCorretores.isEmpty()) {
+            corretorRepository.saveAll(novosCorretores);
+        }
+    }
+
+    private void seedImoveis(ImovelRepository imovelRepository, CorretorRepository corretorRepository) {
+        Corretor paula = corretorRepository.findByEmailIgnoreCase("paula@vistaprime.com").orElse(null);
+        Corretor rafael = corretorRepository.findByEmailIgnoreCase("rafael@vistaprime.com").orElse(null);
+
         List<Imovel> imoveis = List.of(
                 imovel("SP-CB-001", "Cobertura panoramica com terraco gourmet", CategoriaImovel.COBERTURA,
                         FinalidadeImovel.VENDA, StatusImovel.DISPONIVEL, "Sao Paulo", "Vila Mariana",
                         "Rua Joaquim Tavora, 890", "SP", "04015-012", 186.0, 3, 4, 3,
-                        2450000.0, 2100.0, 780.0, true,
+                        2450000.0, 2100.0, 780.0, true, paula,
                         "Vista aberta, automacao, suite master e area social integrada."),
-                imovel("SP-AP-002", "Apartamento compacto perto do metrô", CategoriaImovel.APARTAMENTO,
+                imovel("SP-AP-002", "Apartamento compacto perto do metro", CategoriaImovel.APARTAMENTO,
                         FinalidadeImovel.ALUGUEL, StatusImovel.DISPONIVEL, "Sao Paulo", "Pinheiros",
                         "Rua dos Pinheiros, 520", "SP", "05422-001", 62.0, 2, 2, 1,
-                        4800.0, 780.0, 190.0, true,
+                        4800.0, 780.0, 190.0, true, paula,
                         "Ideal para mobilidade urbana com varanda, coworking e lazer completo."),
                 imovel("RJ-CS-003", "Casa com jardim e piscina para familia", CategoriaImovel.CASA,
                         FinalidadeImovel.VENDA, StatusImovel.DISPONIVEL, "Rio de Janeiro", "Barra da Tijuca",
                         "Avenida das Americas, 4500", "RJ", "22640-102", 320.0, 4, 5, 4,
-                        3980000.0, 950.0, 620.0, true,
+                        3980000.0, 950.0, 620.0, true, rafael,
                         "Projeto contemporaneo, piscina aquecida, espaco gourmet e home office."),
                 imovel("BH-AP-004", "Apartamento com excelente custo-beneficio", CategoriaImovel.APARTAMENTO,
                         FinalidadeImovel.VENDA, StatusImovel.DISPONIVEL, "Belo Horizonte", "Funcionarios",
                         "Rua dos Inconfidentes, 321", "MG", "30140-120", 94.0, 3, 2, 2,
-                        920000.0, 540.0, 160.0, false,
+                        920000.0, 540.0, 160.0, false, paula,
                         "Planta inteligente, iluminacao natural e acesso rapido a servicos."),
                 imovel("CT-CO-005", "Sala comercial pronta para consultorio", CategoriaImovel.COMERCIAL,
                         FinalidadeImovel.ALUGUEL, StatusImovel.DISPONIVEL, "Curitiba", "Centro",
                         "Rua Marechal Floriano, 120", "PR", "80020-090", 48.0, 0, 1, 1,
-                        3200.0, 650.0, 145.0, false,
+                        3200.0, 650.0, 145.0, false, rafael,
                         "Espaco versatil com recepcao, elevador e infraestrutura de seguranca."),
                 imovel("GO-TR-006", "Terreno plano em condominio fechado", CategoriaImovel.TERRENO,
                         FinalidadeImovel.VENDA, StatusImovel.DISPONIVEL, "Goiania", "Jardins Milao",
                         "Quadra 12, lote 08", "GO", "74370-900", 420.0, 0, 0, 0,
-                        690000.0, 390.0, 90.0, false,
-                        "Terreno regular com clube, seguranca 24h e alto potencial de valorizacao.")
+                        690000.0, 390.0, 90.0, false, paula,
+                        "Terreno regular com clube, seguranca 24h e alto potencial de valorizacao."),
+                imovel("RS-RU-007", "Sitio com lago, curral e area produtiva", CategoriaImovel.RURAL,
+                        FinalidadeImovel.VENDA, StatusImovel.DISPONIVEL, "Gramado", "Linha Bonita",
+                        "Estrada do Interior, km 14", "RS", "95670-000", 1250.0, 4, 3, 5,
+                        2850000.0, 0.0, 0.0, true, rafael,
+                        "Propriedade rural pronta para lazer e operacao agro de pequena escala."),
+                imovel("SP-CS-008", "Casa contemporanea em rua arborizada", CategoriaImovel.CASA,
+                        FinalidadeImovel.VENDA, StatusImovel.DISPONIVEL, "Campinas", "Taquaral",
+                        "Rua dos Jasmins, 88", "SP", "13076-021", 210.0, 3, 4, 3,
+                        1740000.0, 0.0, 310.0, false, paula,
+                        "Projeto com living integrado, quintal privativo e suite master."),
+                imovel("SP-CO-009", "Conjunto comercial com fachada corporativa", CategoriaImovel.COMERCIAL,
+                        FinalidadeImovel.VENDA, StatusImovel.DISPONIVEL, "Sao Paulo", "Vila Olimpia",
+                        "Rua Helena, 250", "SP", "04552-050", 134.0, 0, 2, 3,
+                        1980000.0, 1800.0, 520.0, true, rafael,
+                        "Espaco corporativo pronto para operacao com salas modulares e recepcao."),
+                imovel("PE-AP-010", "Apartamento com varanda gourmet e vista livre", CategoriaImovel.APARTAMENTO,
+                        FinalidadeImovel.VENDA, StatusImovel.DISPONIVEL, "Recife", "Boa Viagem",
+                        "Rua dos Navegantes, 1120", "PE", "51021-010", 118.0, 3, 3, 2,
+                        1280000.0, 980.0, 240.0, true, paula,
+                        "Unidade nascente com lazer completo e acesso rapido a servicos.")
         );
 
         List<Imovel> novosImoveis = imoveis.stream()
@@ -189,7 +237,8 @@ public class DataInitializer {
     private Imovel imovel(String codigo, String titulo, CategoriaImovel categoria, FinalidadeImovel finalidade,
                           StatusImovel status, String cidade, String bairro, String endereco, String estado,
                           String cep, Double areaM2, Integer quartos, Integer banheiros, Integer vagas,
-                          Double valor, Double condominio, Double iptu, Boolean destaque, String descricao) {
+                          Double valor, Double condominio, Double iptu, Boolean destaque, Corretor corretor,
+                          String descricao) {
         Imovel imovel = new Imovel();
         imovel.setCodigo(codigo);
         imovel.setTitulo(titulo);
@@ -209,8 +258,22 @@ public class DataInitializer {
         imovel.setCondominio(condominio);
         imovel.setIptu(iptu);
         imovel.setDestaque(destaque);
+        imovel.setCorretor(corretor);
         imovel.setDescricao(descricao);
         imovel.setDataCadastro(LocalDateTime.now().minusDays(15));
         return imovel;
+    }
+
+    private Corretor corretor(String nome, String email, String telefone, String creci, String fotoUrl, String senha) {
+        Corretor corretor = new Corretor();
+        corretor.setNome(nome);
+        corretor.setEmail(email);
+        corretor.setTelefone(telefone);
+        corretor.setCreci(creci);
+        corretor.setFotoUrl(fotoUrl);
+        corretor.setSenha(senha);
+        corretor.setAtivo(true);
+        corretor.setDataCadastro(LocalDateTime.now().minusDays(45));
+        return corretor;
     }
 }
